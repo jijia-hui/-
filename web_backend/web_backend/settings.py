@@ -16,7 +16,6 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 AUTHENTICATION_BACKENDS = [
-    'apps.auth_backend.PlainTextAuthBackend',   # 自定义明文认证
     'django.contrib.auth.backends.ModelBackend', # 可选保留
 ]
 # Quick-start development settings - unsuitable for production

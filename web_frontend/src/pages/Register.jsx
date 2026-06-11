@@ -1,4 +1,4 @@
-import { Form, Input, Button, Card, message, Typography, Switch } from 'antd'
+import { Form, Input, Button, Card, message, Typography, Checkbox } from 'antd'
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
@@ -39,7 +39,7 @@ const Register = () => {
             <Input.Password prefix={<LockOutlined />} placeholder="密码" />
           </Form.Item>
           <Form.Item name="is_teacher" valuePropName="checked" initialValue={false}>
-            <Switch checkedChildren="教师" unCheckedChildren="学生" /> 注册为教师
+            <Checkbox>注册为教师</Checkbox>
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block>注册</Button>

@@ -10,6 +10,5 @@ router.register(r'assignments', AssignmentViewSet)
 router.register(r'submissions', SubmissionViewSet)
 
 urlpatterns = [
-    path('', views.hello),   # 保留原有 hello 测试
     path('api/', include(router.urls)),
 ]
