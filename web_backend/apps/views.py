@@ -6,44 +6,53 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from .models import User, Course, Assignment, Submission
 from .serializers import UserSerializer, CourseSerializer, AssignmentSerializer, SubmissionSerializer
 from .permissions import IsTeacherOrReadOnly, IsOwnerOrTeacher
 
-# 简单的测试视图（保留你原来的 hello）
-from django.http import HttpResponse
+# 简单的测试视图
 def hello(request):
     return HttpResponse("Hello teaching")
-
-from django.db.models import Prefetch
-from .models import Course
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
     def get_permissions(self):
         # 注册（create）允许匿名，其他操作需要登录
         if self.action == 'create':
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
+
     def get_queryset(self):
         # 普通用户只能看自己，教师和管理员可看所有
         if self.request.user.is_teacher or self.request.user.is_staff:
             return User.objects.all()
         return User.objects.filter(id=self.request.user.id)
-    # 新增 me 接口
+
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
 class CourseViewSet(viewsets.ModelViewSet):
+    # 空的 queryset 满足 DRF router 要求，实际查询由 get_queryset 动态决定
+    queryset = Course.objects.none()
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated, IsTeacherOrReadOnly]
-    queryset = Course.objects.all().prefetch_related('students')   # 预取学生关联
 
-    def perform_create(self, serializer):
-        serializer.save(teacher=self.request.user)
+    def get_queryset(self):
+        user = self.request.user
+        # 管理员：所有课程
+        if user.is_staff:
+            return Course.objects.all().prefetch_related('students')
+        # 教师：只看到自己创建的课程
+        if user.is_teacher:
+            return Course.objects.filter(teacher=user).prefetch_related('students')
+        # 学生：看到所有课程（以便选课）
+        return Course.objects.all().prefetch_related('students')
+
     def perform_create(self, serializer):
         # 自动将当前用户设为课程的教师
         serializer.save(teacher=self.request.user)
@@ -92,6 +101,6 @@ class SubmissionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # 创建提交记录，触发异步评测任务
         submission = serializer.save(student=self.request.user, status='pending')
-        # 异步调用评测任务（先占位，后续实现 Celery 任务）
+        # 异步调用评测任务
         from .tasks import run_code_check
         run_code_check.delay(submission.id)

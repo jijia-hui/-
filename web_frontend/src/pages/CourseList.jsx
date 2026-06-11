@@ -42,7 +42,7 @@ const CourseList = ({ user }) => {
     try {
       await api.post(`/courses/${courseId}/enroll/`)
       message.success('选课成功')
-      fetchCourses()
+      fetchCourses()  // 刷新列表，is_enrolled 会变为 true
     } catch (error) {
       message.error('选课失败')
     }
@@ -60,26 +60,39 @@ const CourseList = ({ user }) => {
       </div>
       <Spin spinning={loading}>
         <Row gutter={[16, 16]}>
-          {courses.map(course => (
-            <Col xs={24} sm={12} md={8} lg={6} key={course.id}>
-              <Card
-                title={course.name}
-                extra={<Tag color={course.teacher_name === user?.username ? 'blue' : 'green'}>
-                  {course.teacher_name === user?.username ? '我教的' : '我选的'}
-                </Tag>}
-                actions={[
-                  <Button type="link" onClick={() => navigate(`/courses/${course.id}`)}>查看详情</Button>,
-                  !user?.is_teacher && !course.students?.includes(user?.id) && (
-                    <Button type="link" icon={<UserAddOutlined />} onClick={() => handleEnroll(course.id)}>选课</Button>
-                  )
-                ]}
-              >
-                <p>课程编号：{course.code}</p>
-                <p>教师：{course.teacher_name}</p>
-                <p>学生数：{course.student_count}</p>
-              </Card>
-            </Col>
-          ))}
+          {courses.map(course => {
+            let tagText = '';
+            let tagColor = '';
+            if (course.teacher_name === user?.username) {
+              tagText = '我教的';
+              tagColor = 'blue';
+            } else if (course.is_enrolled) {
+              tagText = '我选的';
+              tagColor = 'green';
+            } else {
+              tagText = '未选课';
+              tagColor = 'default';
+            }
+
+            return (
+              <Col xs={24} sm={12} md={8} lg={6} key={course.id}>
+                <Card
+                  title={course.name}
+                  extra={<Tag color={tagColor}>{tagText}</Tag>}
+                  actions={[
+                    <Button type="link" onClick={() => navigate(`/courses/${course.id}`)}>查看详情</Button>,
+                    !user?.is_teacher && !course.is_enrolled && (
+                      <Button type="link" icon={<UserAddOutlined />} onClick={() => handleEnroll(course.id)}>选课</Button>
+                    )
+                  ]}
+                >
+                  <p>课程编号：{course.code}</p>
+                  <p>教师：{course.teacher_name}</p>
+                  <p>学生数：{course.student_count}</p>
+                </Card>
+              </Col>
+            );
+          })}
         </Row>
       </Spin>
 
