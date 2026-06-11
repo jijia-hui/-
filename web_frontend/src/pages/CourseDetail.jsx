@@ -75,6 +75,7 @@ const CourseDetail = ({ user }) => {
               </TabPane>
               <TabPane tab="学生列表" key="students" icon={<SolutionOutlined />}>
                 <List
+                  locale={{ emptyText: "暂无学生或您无权查看学生列表" }}
                   dataSource={students}
                   renderItem={stu => (
                     <List.Item>

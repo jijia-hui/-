@@ -15,6 +15,9 @@ from django.http import HttpResponse
 def hello(request):
     return HttpResponse("Hello teaching")
 
+from django.db.models import Prefetch
+from .models import Course
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -35,10 +38,12 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class CourseViewSet(viewsets.ModelViewSet):
-    queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated, IsTeacherOrReadOnly]
+    queryset = Course.objects.all().prefetch_related('students')   # 预取学生关联
 
+    def perform_create(self, serializer):
+        serializer.save(teacher=self.request.user)
     def perform_create(self, serializer):
         # 自动将当前用户设为课程的教师
         serializer.save(teacher=self.request.user)
