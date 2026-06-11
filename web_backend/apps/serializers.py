@@ -7,16 +7,12 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'is_teacher', 'avatar', 'bio','password')
         read_only_fields = ('id',)
-    def create(self, validated_data):
-        print("validated_data:", validated_data)  # 调试用
         
-        user = User(
-            username=validated_data['username'],
-            email=validated_data.get('email', ''),
-            is_teacher = bool(validated_data.pop('is_teacher', False))
-        )
-
-        user.set_password(validated_data['password'])
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)   # 自动处理所有字段（包括 is_teacher）
+        user.set_password(password)
+        user.save()
         return user
 
     def update(self, instance, validated_data):
