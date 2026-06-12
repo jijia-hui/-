@@ -1,12 +1,13 @@
+// src/pages/AssignmentList.jsx
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { 
-  Card, Table, Button, Space, Modal, Form, Input, DatePicker, 
-  message, Popconfirm, Tag, Spin, Descriptions 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import {
+  Card, Table, Button, Space, Modal, Form, Input, DatePicker,
+  message, Popconfirm, Tag, Spin, Divider, Tooltip
 } from 'antd'
-import { 
-  PlusOutlined, EditOutlined, DeleteOutlined, 
-  ExperimentOutlined, ArrowLeftOutlined 
+import {
+  PlusOutlined, EditOutlined, DeleteOutlined,
+  ExperimentOutlined, ArrowLeftOutlined, MinusCircleOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import api from '../api/client'
@@ -17,6 +18,7 @@ const { RangePicker } = DatePicker
 const AssignmentList = ({ user }) => {
   const { courseId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const [assignments, setAssignments] = useState([])
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -24,17 +26,13 @@ const AssignmentList = ({ user }) => {
   const [editingAssignment, setEditingAssignment] = useState(null)
   const [form] = Form.useForm()
 
-  // 是否为当前课程的教师
   const isTeacher = user?.is_teacher && course?.teacher === user?.id
 
-  // 加载课程信息和作业列表
   const fetchData = async () => {
     setLoading(true)
     try {
-      // 获取课程详情
       const courseRes = await api.get(`/courses/${courseId}/`)
       setCourse(courseRes.data)
-      // 获取作业列表
       const assignRes = await api.get(`/assignments/?course=${courseId}`)
       setAssignments(assignRes.data.results || assignRes.data)
     } catch (error) {
@@ -45,12 +43,18 @@ const AssignmentList = ({ user }) => {
   }
 
   useEffect(() => {
-    if (courseId) {
-      fetchData()
-    }
+    if (courseId) fetchData()
   }, [courseId])
 
-  // 打开创建/编辑弹窗
+  // 自动打开新建弹窗（如果 state 中有 openCreate 标记）
+  useEffect(() => {
+    if (location.state?.openCreate && isTeacher) {
+      openModal()
+      // 清除 state，避免刷新后重复打开
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location.state, isTeacher])
+
   const openModal = (record = null) => {
     setEditingAssignment(record)
     if (record) {
@@ -58,41 +62,46 @@ const AssignmentList = ({ user }) => {
         title: record.title,
         description: record.description,
         deadline: dayjs(record.deadline),
+        test_cases: record.test_cases && record.test_cases.length > 0
+          ? record.test_cases
+          : [{ input: '', expected_output: '' }]
       })
     } else {
       form.resetFields()
+      form.setFieldsValue({
+        test_cases: [{ input: '', expected_output: '' }]
+      })
     }
     setModalVisible(true)
   }
 
-  // 提交创建或更新
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
+      const filteredTestCases = (values.test_cases || []).filter(
+        tc => tc.input.trim() !== '' || tc.expected_output.trim() !== ''
+      )
       const payload = {
-        ...values,
-        course: courseId,
+        title: values.title,
+        description: values.description,
         deadline: values.deadline.toISOString(),
-        // test_cases 可以先给空数组，后续可扩展
-        test_cases: [],
+        course: courseId,
+        test_cases: filteredTestCases,
       }
       if (editingAssignment) {
-        // 更新作业
         await api.put(`/assignments/${editingAssignment.id}/`, payload)
         message.success('作业更新成功')
       } else {
-        // 创建作业
         await api.post('/assignments/', payload)
         message.success('作业创建成功')
       }
       setModalVisible(false)
-      fetchData() // 刷新列表
+      fetchData()
     } catch (error) {
       message.error(editingAssignment ? '更新失败' : '创建失败')
     }
   }
 
-  // 删除作业
   const handleDelete = async (id) => {
     try {
       await api.delete(`/assignments/${id}/`)
@@ -103,7 +112,6 @@ const AssignmentList = ({ user }) => {
     }
   }
 
-  // 表格列定义
   const columns = [
     {
       title: '作业标题',
@@ -132,11 +140,9 @@ const AssignmentList = ({ user }) => {
       render: (_, record) => {
         const now = dayjs()
         const deadline = dayjs(record.deadline)
-        if (now.isAfter(deadline)) {
-          return <Tag color="red">已截止</Tag>
-        } else {
-          return <Tag color="green">进行中</Tag>
-        }
+        return now.isAfter(deadline)
+          ? <Tag color="red">已截止</Tag>
+          : <Tag color="green">进行中</Tag>
       },
     },
     {
@@ -144,8 +150,8 @@ const AssignmentList = ({ user }) => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <Button 
-            type="link" 
+          <Button
+            type="link"
             icon={<ExperimentOutlined />}
             onClick={() => navigate(`/assignments/${record.id}/lab`)}
           >
@@ -153,8 +159,8 @@ const AssignmentList = ({ user }) => {
           </Button>
           {isTeacher && (
             <>
-              <Button 
-                type="link" 
+              <Button
+                type="link"
                 icon={<EditOutlined />}
                 onClick={() => openModal(record)}
               >
@@ -185,8 +191,8 @@ const AssignmentList = ({ user }) => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Button 
-        icon={<ArrowLeftOutlined />} 
+      <Button
+        icon={<ArrowLeftOutlined />}
         onClick={() => navigate(`/courses/${courseId}`)}
         style={{ marginBottom: 16 }}
       >
@@ -197,9 +203,9 @@ const AssignmentList = ({ user }) => {
           <Space>
             <span>📋 {course?.name} - 作业列表</span>
             {isTeacher && (
-              <Button 
-                type="primary" 
-                icon={<PlusOutlined />} 
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
                 onClick={() => openModal()}
               >
                 新建作业
@@ -209,9 +215,9 @@ const AssignmentList = ({ user }) => {
         }
         bordered={false}
       >
-        <Table 
-          columns={columns} 
-          dataSource={assignments} 
+        <Table
+          columns={columns}
+          dataSource={assignments}
           rowKey="id"
           pagination={{ pageSize: 10 }}
         />
@@ -222,11 +228,11 @@ const AssignmentList = ({ user }) => {
         title={editingAssignment ? "编辑作业" : "新建作业"}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
+        width={800}
         footer={[
           <Button key="cancel" onClick={() => setModalVisible(false)}>取消</Button>,
           <Button key="submit" type="primary" onClick={handleSubmit}>确定</Button>,
         ]}
-        width={600}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -250,6 +256,43 @@ const AssignmentList = ({ user }) => {
           >
             <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: '100%' }} />
           </Form.Item>
+
+          <Divider orientation="left">测试用例</Divider>
+          <Form.List name="test_cases">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'input']}
+                      label="输入 (stdin)"
+                      style={{ width: 250 }}
+                    >
+                      <Input.TextArea rows={2} placeholder="示例：5\n10" />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'expected_output']}
+                      label="期望输出"
+                      style={{ width: 250 }}
+                    >
+                      <Input.TextArea rows={2} placeholder="示例：15" />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    添加测试用例
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+          <div style={{ color: '#8c8c8c', fontSize: 12 }}>
+            提示：输入/期望输出均为纯文本，评测时会逐字符比对（忽略末尾换行）。
+          </div>
         </Form>
       </Modal>
     </div>

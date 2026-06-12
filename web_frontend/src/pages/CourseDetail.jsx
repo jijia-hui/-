@@ -1,3 +1,4 @@
+// src/pages/CourseDetail.jsx
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Card, Descriptions, Button, Tabs, List, Spin, message, Tag } from 'antd'
@@ -21,7 +22,6 @@ const CourseDetail = ({ user }) => {
         setCourse(courseRes.data)
         const assignRes = await api.get(`/assignments/?course=${courseId}`)
         setAssignments(assignRes.data.results || assignRes.data)
-        // 获取学生列表（需要额外 API，可扩展）
         setStudents(courseRes.data.students || [])
       } catch (error) {
         message.error('加载课程详情失败')
@@ -68,7 +68,12 @@ const CourseDetail = ({ user }) => {
                   )}
                 />
                 {isTeacher && (
-                  <Button type="dashed" block style={{ marginTop: 16 }} onClick={() => navigate(`/courses/${courseId}/assignments/create`)}>
+                  <Button 
+                    type="dashed" 
+                    block 
+                    style={{ marginTop: 16 }} 
+                    onClick={() => navigate(`/courses/${courseId}/assignments`, { state: { openCreate: true } })}
+                  >
                     新建作业
                   </Button>
                 )}
