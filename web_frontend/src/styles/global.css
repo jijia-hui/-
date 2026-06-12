@@ -1,3 +1,10 @@
+/* 全局样式 - 现代化、毛玻璃、动效 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,13 +12,122 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5;
 }
 
-.logo {
-  float: left;
-  margin-right: 24px;
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
+/* 页面入场动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 卡片悬停效果 */
+.ant-card {
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ant-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+}
+
+/* 表格样式优化 */
+.ant-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-weight: 600;
+}
+.ant-table-tbody > tr:hover > td {
+  background-color: #f5f5f5;
+}
+
+/* 按钮样式微调 */
+.ant-btn-primary {
+  box-shadow: 0 2px 0 rgba(5, 145, 255, 0.1);
+  transition: all 0.2s;
+}
+.ant-btn-primary:hover {
+  background: #4096ff;
+  transform: translateY(-1px);
+}
+.ant-btn-text:hover {
+  background-color: #f5f5f5;
+}
+
+/* 标签样式 */
+.ant-tag {
+  border-radius: 16px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 24px;
+}
+
+/* 模态框圆角 */
+.ant-modal-content {
+  border-radius: 16px;
+}
+
+/* 下拉菜单圆角 */
+.ant-dropdown-menu {
+  border-radius: 12px;
+}
+
+/* 布局容器统一背景 */
+.ant-layout {
+  background: #f0f2f5;
+}
 .ant-layout-header {
-  background: #001529;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02);
+  padding: 0 48px;
+}
+.ant-layout-content {
+  padding: 24px 48px;
+  min-height: calc(100vh - 64px);
+}
+
+/* 导航菜单项悬停 */
+.ant-menu-item:hover {
+  color: #1677ff !important;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .ant-layout-header {
+    padding: 0 24px;
+  }
+  .ant-layout-content {
+    padding: 16px 24px;
+  }
 }

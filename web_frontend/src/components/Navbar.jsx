@@ -1,11 +1,14 @@
 import { Layout, Menu, Button, Avatar, Dropdown, Space } from 'antd'
-import { UserOutlined, BookOutlined, LogoutOutlined, HistoryOutlined } from '@ant-design/icons'
+import { UserOutlined, BookOutlined, LogoutOutlined, HistoryOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 
 const { Header } = Layout
 
 const Navbar = ({ isAuthenticated, user, logout }) => {
   const navigate = useNavigate()
+  // 可选：主题切换状态，如果不需要可删除
+  const [isDark, setIsDark] = useState(false)
 
   const menuItems = isAuthenticated ? [
     { key: 'courses', icon: <BookOutlined />, label: <Link to="/courses">我的课程</Link> },
@@ -20,22 +23,26 @@ const Navbar = ({ isAuthenticated, user, logout }) => {
   }
 
   return (
-    <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <div className="logo" style={{ color: 'white', fontSize: '20px', fontWeight: 'bold' }}>
-        <Link to="/" style={{ color: 'white' }}>在线教学平台</Link>
+    <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 1000 }}>
+      <div className="logo" style={{ fontSize: '20px', fontWeight: 'bold', marginRight: 48 }}>
+        <Link to="/" style={{ color: '#1677ff' }}>在线教学平台</Link>
       </div>
       {isAuthenticated ? (
         <>
-          <Menu theme="dark" mode="horizontal" items={menuItems} style={{ flex: 1, minWidth: 0 }} />
-          <Dropdown menu={userMenu} placement="bottomRight">
-            <Space style={{ cursor: 'pointer' }}>
-              <Avatar icon={<UserOutlined />} />
-              <span style={{ color: 'white' }}>{user?.username}</span>
-            </Space>
-          </Dropdown>
+          <Menu mode="horizontal" items={menuItems} style={{ flex: 1, minWidth: 0, borderBottom: 'none', background: 'transparent' }} />
+          <Space>
+            <Dropdown menu={userMenu} placement="bottomRight">
+              <Space style={{ cursor: 'pointer' }}>
+                <Avatar icon={<UserOutlined />} />
+                <span>{user?.username}</span>
+              </Space>
+            </Dropdown>
+          </Space>
         </>
       ) : (
-        <Button type="primary" onClick={() => navigate('/login')}>登录 / 注册</Button>
+        <Button type="primary" onClick={() => navigate('/login')} style={{ borderRadius: 20 }}>
+          登录 / 注册
+        </Button>
       )}
     </Header>
   )
