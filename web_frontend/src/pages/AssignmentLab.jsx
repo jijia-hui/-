@@ -1,4 +1,4 @@
-// src/pages/AssignmentLab.jsx
+// src/pages/AssignmentLab.jsx (完整，已添加参考文档下载)
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import {
@@ -88,7 +88,6 @@ const AssignmentLab = ({ user }) => {
     return false
   }
 
-  // 学生提交记录表格列（学生自己查看）- 已移除输出列
   const studentColumns = [
     { title: '提交时间', dataIndex: 'created_at', render: (t) => new Date(t).toLocaleString() },
     { title: '状态', dataIndex: 'status', render: (s) => {
@@ -99,7 +98,6 @@ const AssignmentLab = ({ user }) => {
     { title: '得分', dataIndex: 'score', render: (s) => `${s}分` },
   ]
 
-  // 教师查看所有学生提交记录表格列（增加评分操作）- 已移除输出列
   const teacherColumns = [
     { title: '学生', dataIndex: 'student_name', key: 'student_name' },
     { title: '提交时间', dataIndex: 'created_at', render: (t) => new Date(t).toLocaleString() },
@@ -161,6 +159,14 @@ const AssignmentLab = ({ user }) => {
             <Text strong style={{ color: '#ff4d4f' }}>{new Date(assignment?.deadline).toLocaleString()}</Text>
           </Descriptions.Item>
         </Descriptions>
+        {/* 参考文档下载按钮 */}
+        {assignment?.reference_file && (
+          <div style={{ marginTop: 16 }}>
+            <Button type="link" href={assignment.reference_file} target="_blank" download>
+              📎 下载参考文档
+            </Button>
+          </div>
+        )}
       </Card>
 
       <Tabs defaultActiveKey={isTeacher ? "history" : "submit"} size="large">

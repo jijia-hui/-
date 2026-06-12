@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
   Card, Table, Button, Space, Modal, Form, Input, DatePicker,
-  message, Popconfirm, Tag, Spin, Tooltip, Input as AntInput
+  message, Popconfirm, Tag, Spin, Tooltip, Input as AntInput, Upload
 } from 'antd'
 import {
   PlusOutlined, EditOutlined, DeleteOutlined,
   ExperimentOutlined, ArrowLeftOutlined,
-  FileSearchOutlined, SearchOutlined
+  FileSearchOutlined, SearchOutlined, UploadOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import api from '../api/client'
@@ -50,7 +50,6 @@ const AssignmentList = ({ user }) => {
     if (courseId) fetchData()
   }, [courseId])
 
-  // 自动打开新建弹窗
   useEffect(() => {
     if (location.state?.openCreate && isTeacher) {
       openModal()
@@ -58,7 +57,6 @@ const AssignmentList = ({ user }) => {
     }
   }, [location.state, isTeacher])
 
-  // 搜索过滤
   useEffect(() => {
     if (!searchText.trim()) {
       setFilteredAssignments(assignments)
@@ -78,9 +76,13 @@ const AssignmentList = ({ user }) => {
         title: record.title,
         description: record.description,
         deadline: dayjs(record.deadline),
+        reference_file: record.reference_file ? [
+          { uid: '-1', name: record.reference_file.split('/').pop(), url: record.reference_file }
+        ] : []
       })
     } else {
       form.resetFields()
+      form.setFieldsValue({ reference_file: [] })
     }
     setModalVisible(true)
   }
@@ -88,17 +90,24 @@ const AssignmentList = ({ user }) => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
-      const payload = {
-        title: values.title,
-        description: values.description,
-        deadline: values.deadline.toISOString(),
-        course: courseId,
+      const formData = new FormData()
+      formData.append('title', values.title)
+      formData.append('description', values.description)
+      formData.append('deadline', values.deadline.toISOString())
+      formData.append('course', courseId)
+      if (values.reference_file && values.reference_file[0]?.originFileObj) {
+        formData.append('reference_file', values.reference_file[0].originFileObj)
       }
+
       if (editingAssignment) {
-        await api.put(`/assignments/${editingAssignment.id}/`, payload)
+        await api.put(`/assignments/${editingAssignment.id}/`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
         message.success('作业更新成功')
       } else {
-        await api.post('/assignments/', payload)
+        await api.post('/assignments/', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
         message.success('作业创建成功')
       }
       setModalVisible(false)
@@ -168,7 +177,7 @@ const AssignmentList = ({ user }) => {
     {
       title: '操作',
       key: 'action',
-      width: 340,  // 根据按钮数量调整，确保所有按钮在一行
+      width: 340,
       render: (_, record) => (
         <Space size="small">
           <Button
@@ -220,10 +229,7 @@ const AssignmentList = ({ user }) => {
   return (
     <div style={{ padding: 24 }}>
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate(`/courses/${courseId}`)}
-        >
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/courses/${courseId}`)}>
           返回课程
         </Button>
 
@@ -232,11 +238,7 @@ const AssignmentList = ({ user }) => {
             <Space>
               <span>📋 {course?.name} - 作业列表</span>
               {isTeacher && (
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => openModal()}
-                >
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
                   新建作业
                 </Button>
               )}
@@ -258,7 +260,7 @@ const AssignmentList = ({ user }) => {
             columns={columns}
             dataSource={filteredAssignments}
             rowKey="id"
-            scroll={{ x: 'max-content' }}   // 关键：支持水平滚动，解决按钮溢出
+            scroll={{ x: 'max-content' }}
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
@@ -281,26 +283,19 @@ const AssignmentList = ({ user }) => {
           ]}
         >
           <Form form={form} layout="vertical">
-            <Form.Item
-              name="title"
-              label="作业标题"
-              rules={[{ required: true, message: '请输入作业标题' }]}
-            >
+            <Form.Item name="title" label="作业标题" rules={[{ required: true, message: '请输入作业标题' }]}>
               <Input placeholder="例如：Python 基础练习一" />
             </Form.Item>
-            <Form.Item
-              name="description"
-              label="作业描述"
-              rules={[{ required: true, message: '请输入作业描述' }]}
-            >
+            <Form.Item name="description" label="作业描述" rules={[{ required: true, message: '请输入作业描述' }]}>
               <TextArea rows={4} placeholder="详细描述作业要求..." />
             </Form.Item>
-            <Form.Item
-              name="deadline"
-              label="截止时间"
-              rules={[{ required: true, message: '请选择截止时间' }]}
-            >
+            <Form.Item name="deadline" label="截止时间" rules={[{ required: true, message: '请选择截止时间' }]}>
               <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="reference_file" label="参考文档" valuePropName="fileList" getValueFromEvent={(e) => e?.fileList}>
+              <Upload beforeUpload={() => false} maxCount={1} accept=".pdf,.doc,.docx,.jpg,.png,.zip">
+                <Button icon={<UploadOutlined />}>选择文件</Button>
+              </Upload>
             </Form.Item>
           </Form>
         </Modal>

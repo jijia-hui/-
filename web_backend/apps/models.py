@@ -38,14 +38,20 @@ class Course(models.Model):
         return self.name
 
 
+
 class Assignment(models.Model):
     """作业/实验模型"""
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments', verbose_name="所属课程")
     title = models.CharField(max_length=200, verbose_name="作业标题")
     description = models.TextField(verbose_name="作业描述")
-    # 测试用例，存储为 JSON 列表，每个元素包含 input, expected
     test_cases = models.JSONField(default=list, verbose_name="测试用例")
     deadline = models.DateTimeField(verbose_name="截止时间")
+    reference_file = models.FileField(
+        upload_to='assignment_refs/',
+        blank=True,
+        null=True,
+        verbose_name="参考文档"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

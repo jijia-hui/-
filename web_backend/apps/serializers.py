@@ -59,10 +59,17 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 class AssignmentSerializer(serializers.ModelSerializer):
+    reference_file_url = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Assignment
         fields = '__all__'
         read_only_fields = ('created_at', 'updated_at')
+
+    def get_reference_file_url(self, obj):
+        if obj.reference_file:
+            return obj.reference_file.url
+        return None
 
 
 class SubmissionSerializer(serializers.ModelSerializer):
