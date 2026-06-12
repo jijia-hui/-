@@ -10,6 +10,7 @@ import AssignmentList from './pages/AssignmentList'
 import AssignmentLab from './pages/AssignmentLab'
 import SubmissionHistory from './pages/SubmissionHistory'
 import Profile from './pages/Profile'
+import SubmissionReview from './pages/SubmissionReview'   // 新增导入
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -45,7 +46,6 @@ function App() {
         <Route path="/login" element={<Login onLogin={login} />} />
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Navigate to="/courses" />} />
-        {/* 注意：下面这行重复的路由已删除，只保留 PrivateRoute 内部的 */}
         <Route element={<PrivateRoute isAuthenticated={isAuthenticated} />}>
           <Route path="/courses" element={<CourseList user={user} />} />
           <Route path="/courses/:courseId" element={<CourseDetail user={user} />} />
@@ -53,6 +53,8 @@ function App() {
           <Route path="/assignments/:assignmentId/lab" element={<AssignmentLab user={user} />} />
           <Route path="/submissions" element={<SubmissionHistory user={user} />} />
           <Route path="/profile" element={<Profile user={user} />} />
+          {/* 新增：教师查看作业提交详情 */}
+          <Route path="/assignments/:assignmentId/submissions" element={<SubmissionReview />} />
         </Route>
       </Routes>
     </>

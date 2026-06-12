@@ -84,6 +84,8 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             return Assignment.objects.filter(course_id=course_id)
         return Assignment.objects.all()
 
+# apps/views.py 中 SubmissionViewSet 部分
+
 class SubmissionViewSet(viewsets.ModelViewSet):
     queryset = Submission.objects.all()
     serializer_class = SubmissionSerializer
@@ -96,7 +98,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         return Submission.objects.filter(student=user)
 
     def create(self, request, *args, **kwargs):
-        # 手动处理创建逻辑，绕过序列化器对某些字段的验证
+        # 学生提交时，状态为 pending，等待教师评分
         assignment_id = request.data.get('assignment')
         code = request.data.get('code')
         if not assignment_id or not code:
@@ -105,14 +107,41 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             assignment = Assignment.objects.get(id=assignment_id)
         except Assignment.DoesNotExist:
             return Response({'detail': '作业不存在'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         submission = Submission.objects.create(
             assignment=assignment,
             student=request.user,
             code=code,
-            status='success',
+            status='pending',      # 改为 pending，等待评分
             score=0,
-            output='提交成功，无需评测。'
+            output='等待教师评分。'
         )
         serializer = self.get_serializer(submission)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def grade(self, request, pk=None):
+        """教师评分接口"""
+        submission = self.get_object()
+        # 权限：只有教师（且是该课程教师）可以评分
+        if not request.user.is_teacher:
+            return Response({'detail': '只有教师可以评分'}, status=status.HTTP_403_FORBIDDEN)
+        # 检查教师是否是该作业课程的教师
+        if submission.assignment.course.teacher != request.user:
+            return Response({'detail': '你无权评分此提交'}, status=status.HTTP_403_FORBIDDEN)
+
+        score = request.data.get('score')
+        if score is None:
+            return Response({'detail': '缺少分数'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            score = int(score)
+            if score < 0 or score > 100:
+                raise ValueError
+        except (ValueError, TypeError):
+            return Response({'detail': '分数必须是0-100的整数'}, status=status.HTTP_400_BAD_REQUEST)
+
+        submission.score = score
+        submission.status = 'graded'   # 可选新状态，或复用 'success'
+        submission.save()
+        serializer = self.get_serializer(submission)
+        return Response(serializer.data)
