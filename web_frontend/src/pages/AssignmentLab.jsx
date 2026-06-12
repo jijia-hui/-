@@ -1,4 +1,4 @@
-// src/pages/AssignmentLab.jsx (完整，已添加参考文档下载)
+// src/pages/AssignmentLab.jsx
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import {
@@ -46,7 +46,7 @@ const AssignmentLab = ({ user }) => {
 
   const handleSubmit = async () => {
     if (!fileContent.trim()) {
-      message.warning('请先上传代码文件')
+      message.warning('请先上传文件')
       return
     }
     setSubmitting(true)
@@ -81,7 +81,7 @@ const AssignmentLab = ({ user }) => {
       setUploadLoading(false)
     }
     reader.onerror = () => {
-      message.error('文件读取失败')
+      message.error('文件读取失败，请确保文件为文本格式（.txt, .md, .py等）')
       setUploadLoading(false)
     }
     reader.readAsText(file)
@@ -159,7 +159,6 @@ const AssignmentLab = ({ user }) => {
             <Text strong style={{ color: '#ff4d4f' }}>{new Date(assignment?.deadline).toLocaleString()}</Text>
           </Descriptions.Item>
         </Descriptions>
-        {/* 参考文档下载按钮 */}
         {assignment?.reference_file && (
           <div style={{ marginTop: 16 }}>
             <Button type="link" href={assignment.reference_file} target="_blank" download>
@@ -176,12 +175,15 @@ const AssignmentLab = ({ user }) => {
               <Upload
                 beforeUpload={handleFileUpload}
                 showUploadList={false}
-                accept=".py,.java,.c,.cpp,.js,.go,.rs,.txt,.cs,.php,.rb,.pl,.sh"
+                accept=".txt,.md,.markdown,.py,.java,.c,.cpp,.js,.go,.rs,.cs,.php,.rb,.pl,.sh,.json,.xml,.html,.css"
               >
                 <Button icon={<UploadOutlined />} loading={uploadLoading} size="large">
-                  选择代码文件
+                  选择文件
                 </Button>
               </Upload>
+              <div style={{ color: '#8c8c8c', fontSize: 12 }}>
+                支持文本格式文件（.txt, .md, .py, .java, .c, .js 等），文件内容将作为答案提交。
+              </div>
               {fileName && (
                 <div style={{ padding: 16, background: '#f6ffed', borderRadius: 8, border: '1px solid #b7eb8f' }}>
                   <CheckCircleOutlined style={{ color: '#52c41a', marginRight: 8 }} />
@@ -246,7 +248,7 @@ const AssignmentLab = ({ user }) => {
               <Descriptions.Item label="当前得分">{selectedSubmission.score}分</Descriptions.Item>
             </Descriptions>
             <div style={{ marginTop: 16 }}>
-              <Text strong>提交的代码：</Text>
+              <Text strong>提交的答案：</Text>
               <pre style={{ background: '#f6f6f6', padding: 12, borderRadius: 8, overflow: 'auto', maxHeight: 400 }}>
                 {selectedSubmission.code}
               </pre>

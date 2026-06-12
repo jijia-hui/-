@@ -56,7 +56,7 @@ const CourseDetail = ({ user }) => {
                     <List.Item
                       actions={[
                         <Button type="link" onClick={() => navigate(`/assignments/${item.id}/lab`)}>
-                          进入实验
+                          进入作业
                         </Button>
                       ]}
                     >

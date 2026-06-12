@@ -185,7 +185,7 @@ const AssignmentList = ({ user }) => {
             icon={<ExperimentOutlined />}
             onClick={() => navigate(`/assignments/${record.id}/lab`)}
           >
-            进入实验
+            进入作业
           </Button>
           {isTeacher && (
             <>
