@@ -84,8 +84,6 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             return Assignment.objects.filter(course_id=course_id)
         return Assignment.objects.all()
 
-# apps/views.py 中 SubmissionViewSet 部分
-
 class SubmissionViewSet(viewsets.ModelViewSet):
     queryset = Submission.objects.all()
     serializer_class = SubmissionSerializer
@@ -93,9 +91,17 @@ class SubmissionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        # 基础权限过滤
         if user.is_teacher:
-            return Submission.objects.filter(assignment__course__teacher=user)
-        return Submission.objects.filter(student=user)
+            queryset = Submission.objects.filter(assignment__course__teacher=user)
+        else:
+            queryset = Submission.objects.filter(student=user)
+
+        # 关键修复：支持按作业 ID 过滤（避免跨作业显示提交）
+        assignment_id = self.request.query_params.get('assignment')
+        if assignment_id:
+            queryset = queryset.filter(assignment_id=assignment_id)
+        return queryset
 
     def create(self, request, *args, **kwargs):
         # 学生提交时，状态为 pending，等待教师评分
@@ -141,7 +147,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             return Response({'detail': '分数必须是0-100的整数'}, status=status.HTTP_400_BAD_REQUEST)
 
         submission.score = score
-        submission.status = 'graded'   # 可选新状态，或复用 'success'
+        submission.status = 'graded'
         submission.save()
         serializer = self.get_serializer(submission)
         return Response(serializer.data)
