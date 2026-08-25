@@ -1,0 +1,42 @@
+PASS  UC01 学生注册: HTTP 201（期望 201）
+PASS  UC01 教师注册: HTTP 201（期望 201）
+PASS  UC02 学生登录: HTTP 200（期望 200）
+PASS  UC02 教师登录: HTTP 200（期望 200）
+PASS  UC02 未注册用户登录被拒: HTTP 400（期望 400）
+PASS  UC01 注册未选课学生: HTTP 201（期望 201）
+PASS  UC02 未选课学生登录: HTTP 200（期望 200）
+PASS  UC03 教师创建课程: HTTP 201（期望 201）
+PASS  UC03 学生创建课程被拒: HTTP 403（期望 403）
+PASS  UC04 学生浏览课程列表: HTTP 200（期望 200）
+PASS  课程列表包含新课程: True
+PASS  UC04 学生查看课程详情: HTTP 200（期望 200）
+PASS  UC05 学生选课: HTTP 200（期望 200）
+PASS  UC05 选课后查看详情: HTTP 200（期望 200）
+PASS  选课后 is_enrolled=True: True
+PASS  UC05 教师选课被拒: HTTP 400（期望 400）
+PASS  UC06 教师创建作业: HTTP 201（期望 201）
+PASS  UC07 学生查看作业详情: HTTP 200（期望 200）
+PASS  UC08 学生提交作业: HTTP 201（期望 201）
+PASS  提交状态为 pending: pending
+PASS  UC08-异常 未选课学生提交被拒: HTTP 403（期望 403）
+PASS  UC08-异常 教师提交被拒: HTTP 403（期望 403）
+PASS  UC06 创建过期作业: HTTP 201（期望 201）
+PASS  UC08-异常 过期作业提交被拒: HTTP 400（期望 400）
+PASS  UC09 学生查看提交记录: HTTP 200（期望 200）
+PASS  提交记录包含本次提交: True
+PASS  UC09 提交记录按作业隔离: HTTP 200（期望 200）
+PASS  UC10 教师查看作业提交列表: HTTP 200（期望 200）
+PASS  教师列表包含该提交: True
+PASS  UC11 教师评分: HTTP 200（期望 200）
+PASS  评分结果: graded/92
+PASS  UC11-异常 学生评分被拒: HTTP 403（期望 403）
+PASS  UC11-异常 分数越界被拒: HTTP 400（期望 400）
+PASS  UC12 学生查看个人信息: HTTP 200（期望 200）
+PASS  个人信息正确: day1s_stu_623935
+PASS  UC-权限 学生删除课程被拒: HTTP 403（期望 403）
+PASS  清理 删除学生账号: HTTP 204（期望 204）
+Traceback (most recent call last):
+  File "D:\online_teaching_platform\04_tests\smoke\day1_smoke_api.py", line 168, in <module>
+    req('DELETE', f"/api/users/{oth['id']}/", token=tea_tok, expect=204, name='清理 删除未选课学生账号')
+                                ^^^
+NameError: name 'oth' is not defined
