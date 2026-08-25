@@ -1,0 +1,14 @@
+sequenceDiagram
+    actor U as 用户
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+
+    U->>FE: 输入用户名/密码，提交
+    FE->>API: POST /api/auth/token/
+    API->>DB: 校验用户名与密码
+    DB-->>API: 校验结果
+    API-->>FE: 200 + Token（失败 → 400"用户名或密码错误"）
+    FE->>API: GET /api/users/me/（携带 Token）
+    API-->>FE: 用户信息（用户名/邮箱/身份）
+    FE->>FE: 保存 Token 与用户信息，进入课程页

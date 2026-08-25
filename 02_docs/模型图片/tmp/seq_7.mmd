@@ -1,0 +1,16 @@
+sequenceDiagram
+    actor T as 教师
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant FS as 媒体存储
+    participant DB as MySQL
+
+    T->>FE: 填写标题/描述/截止时间，可选上传参考文档
+    FE->>API: POST/PUT /api/assignments/（multipart，含 reference_file）
+    API->>FS: 保存参考文档文件
+    FS-->>API: 文件 URL
+    API->>DB: 创建/更新作业记录
+    DB-->>API: 作业记录
+    API-->>FE: 201/200 作业
+    FE-->>T: 提示成功，刷新列表
+    Note over T,DB: 删除：DELETE /api/assignments/{id}（Popconfirm 确认）<br/>备选：非授课教师 → 403；学生 → 403

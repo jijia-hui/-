@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor T as 教师
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+
+    T->>FE: 点击"创建课程"，填写名称/编号/描述
+    FE->>API: POST /api/courses/ {name,code,description}
+    API->>DB: 校验编号唯一，创建课程（teacher=当前用户）
+    DB-->>API: 课程记录
+    API-->>FE: 201 创建成功
+    FE->>API: GET /api/courses/（刷新）
+    API-->>FE: 新课程出现在列表
+    FE-->>T: 提示"课程创建成功"
+    Note over T,DB: 备选：编号重复 → 400；学生调用 → 403

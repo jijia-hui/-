@@ -1,0 +1,18 @@
+sequenceDiagram
+    actor U as 用户
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+
+    U->>FE: 进入"我的课程"页
+    FE->>API: GET /api/courses/
+    API->>DB: 查询全部课程（含学生数、当前用户选课状态）
+    DB-->>API: 课程列表
+    API-->>FE: 200 课程列表
+    FE-->>U: 渲染课程卡片（编号/教师/学生数/选课标记）
+    U->>FE: 点击课程卡片
+    FE->>API: GET /api/courses/{id}/
+    API->>DB: 查询课程详情与学生列表
+    DB-->>API: 课程详情
+    API-->>FE: 200 课程详情
+    FE-->>U: 展示作业列表与学生列表（无权限时学生列表为空）

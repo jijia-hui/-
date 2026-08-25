@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor S as 学生
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+
+    S->>FE: 选择文本文件（.py/.txt/.md 等）
+    FE->>FE: FileReader 读取文件内容
+    S->>FE: 点击"提交作业"
+    FE->>API: POST /api/submissions/ {assignment, code}
+    API->>API: 校验：非教师、已选课、未过截止时间
+    alt 校验失败
+        API-->>FE: 403/400（教师/未选课/已截止）
+        FE-->>S: 显示具体错误提示
+    else 校验通过
+        API->>DB: 创建提交记录（status=pending, score=0）
+        DB-->>API: 提交记录
+        API-->>FE: 201 提交成功
+        FE-->>S: 提示"提交成功"，刷新提交记录
+    end

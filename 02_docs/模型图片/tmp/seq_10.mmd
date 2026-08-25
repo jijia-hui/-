@@ -1,0 +1,13 @@
+sequenceDiagram
+    actor S as 学生
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+
+    S->>FE: 进入"提交记录"页或作业页"提交记录"标签
+    FE->>API: GET /api/submissions/?assignment={id}（可省略）
+    API->>DB: 查询当前学生（+按作业过滤）的提交
+    DB-->>API: 提交列表（时间/状态/得分）
+    API-->>FE: 200 提交列表
+    FE-->>S: 展示表格；无记录时显示空状态
+    Note over S,DB: 隔离性：只能看到自己的提交；按作业过滤不串作业（今日修复）

@@ -1,0 +1,16 @@
+sequenceDiagram
+    actor T as 教师
+    participant API as 后端 API
+    participant PERM as 权限校验
+    participant DB as MySQL
+
+    T->>API: PATCH/DELETE /api/courses/{id}/
+    API->>PERM: 校验是否为该课程授课教师（或管理员）
+    alt 非授课教师
+        PERM-->>API: 拒绝
+        API-->>T: 403/404
+    else 授课教师
+        API->>DB: 更新或删除课程（删除级联作业与提交）
+        DB-->>API: 成功
+        API-->>T: 200/204
+    end

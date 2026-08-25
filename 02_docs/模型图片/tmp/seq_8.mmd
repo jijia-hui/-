@@ -1,0 +1,14 @@
+sequenceDiagram
+    actor U as 用户
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+
+    U->>FE: 在作业列表点击"进入作业"
+    FE->>API: GET /api/assignments/{id}/
+    API->>DB: 查询作业（描述/截止时间/参考文档）
+    DB-->>API: 作业详情
+    API-->>FE: 200 作业详情
+    FE-->>U: 展示描述与截止时间；有参考文档时显示下载按钮
+    U->>API: 点击下载参考文档（GET /media/...）
+    API-->>U: 文件内容

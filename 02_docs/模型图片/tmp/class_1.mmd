@@ -1,0 +1,46 @@
+classDiagram
+    class User {
+        +int id
+        +str username
+        +str email
+        +str password(哈希)
+        +bool is_teacher
+        +str avatar
+        +str bio
+        +bool is_staff
+        +set_password(pwd)
+        +check_password(pwd)
+    }
+    class Course {
+        +int id
+        +str name
+        +str code(唯一)
+        +str description
+        +datetime created_at
+        +datetime updated_at
+        +User teacher(授课教师)
+    }
+    class Assignment {
+        +int id
+        +str title
+        +str description
+        +JSON test_cases(预留)
+        +datetime deadline
+        +FileField reference_file
+        +datetime created_at
+        +datetime updated_at
+    }
+    class Submission {
+        +int id
+        +Text code
+        +str status(pending/graded)
+        +int score(0-100)
+        +Text output
+        +datetime created_at
+    }
+
+    User "1" -- "0..*" Course : teacher 授课
+    User "0..*" -- "0..*" Course : students 选课
+    Course "1" -- "0..*" Assignment : 包含
+    Assignment "1" -- "0..*" Submission : 产生
+    User "1" -- "0..*" Submission : student 提交

@@ -1,0 +1,22 @@
+sequenceDiagram
+    actor T as 教师
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant PERM as 权限校验
+    participant DB as MySQL
+
+    T->>FE: 在评分弹窗输入 0-100 分，点击保存
+    FE->>API: POST /api/submissions/{id}/grade/ {score}
+    API->>PERM: 校验教师身份且为该课程授课教师
+    alt 无权限
+        PERM-->>API: 拒绝
+        API-->>FE: 403"你无权评分此提交"
+    else 有权限
+        API->>API: 校验分数为 0-100 整数（否则 400）
+        API->>DB: 更新 score，status=graded
+        DB-->>API: 成功
+        API-->>FE: 200 已评分提交
+        FE->>API: GET /api/submissions/?assignment={id}（刷新）
+        API-->>FE: 更新后的列表
+        FE-->>T: 提示"评分已保存"
+    end

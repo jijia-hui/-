@@ -1,0 +1,63 @@
+classDiagram
+    class UserViewSet {
+        +get_permissions() 注册匿名,其余登录
+        +perform_create() 保存用户并发送注册邮件
+        +me() 返回当前用户
+    }
+    class CourseViewSet {
+        +get_queryset() 按角色过滤
+        +create() 教师创建
+        +perform_create() 自动设置 teacher
+        +enroll() 学生选课
+        +unenroll() 学生退课
+    }
+    class AssignmentViewSet {
+        +get_queryset() 按课程过滤
+    }
+    class SubmissionViewSet {
+        +get_queryset() 学生看自己/教师看本课程
+        +create() 校验教师/选课/截止时间
+        +grade() 教师评分(0-100)
+    }
+    class IsCourseTeacherOrReadOnly {
+        +has_permission() 教师可写
+        +has_object_permission() 授课教师/管理员可改
+    }
+    class UserSerializer {
+        +password 只写
+        +email 必填
+        +create() 密码哈希
+    }
+    class CourseSerializer {
+        +teacher_name 只读
+        +student_count 计算
+        +students 按角色返回
+        +is_enrolled 计算
+    }
+    class AssignmentSerializer {
+        +reference_file_url 计算
+    }
+    class SubmissionSerializer {
+        +student_name 只读
+        +assignment_title 只读
+        +student/assignment 只读(防篡改)
+    }
+    class User
+    class Course
+    class Assignment
+    class Submission
+
+    UserViewSet --> UserSerializer
+    CourseViewSet --> CourseSerializer
+    AssignmentViewSet --> AssignmentSerializer
+    SubmissionViewSet --> SubmissionSerializer
+    CourseViewSet --> IsCourseTeacherOrReadOnly
+    AssignmentViewSet --> IsCourseTeacherOrReadOnly
+    UserSerializer --> User
+    CourseSerializer --> Course
+    AssignmentSerializer --> Assignment
+    SubmissionSerializer --> Submission
+    UserViewSet --> User
+    CourseViewSet --> Course
+    AssignmentViewSet --> Assignment
+    SubmissionViewSet --> Submission

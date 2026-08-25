@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor S as 学生
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+
+    S->>FE: 点击课程卡片"选课"按钮
+    FE->>API: POST /api/courses/{id}/enroll/
+    API->>DB: 将当前用户加入课程学生名单
+    DB-->>API: 成功
+    API-->>FE: 200 enrolled
+    FE->>API: GET /api/courses/（刷新）
+    API-->>FE: is_enrolled=true
+    FE-->>S: 卡片标记变为"我选的"
+    Note over S,DB: 备选：教师选课 → 400"教师不能选课"<br/>退课：POST /api/courses/{id}/unenroll/ 从名单移除

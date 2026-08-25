@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor U as 用户
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+    participant MAIL as 邮件系统
+
+    U->>FE: 填写用户名/邮箱/密码，选择身份，提交
+    FE->>API: POST /api/users/ {username,email,password,is_teacher}
+    API->>DB: 校验用户名唯一性，创建用户（密码哈希）
+    DB-->>API: 用户记录
+    API->>MAIL: 发送"注册成功"通知邮件（失败仅记日志）
+    API-->>FE: 201 注册成功
+    FE-->>U: 提示注册成功，跳转登录页
+    Note over U,MAIL: 备选：用户名已存在/邮箱格式错误 → 400 提示失败<br/>邮件发送失败 → 注册仍成功

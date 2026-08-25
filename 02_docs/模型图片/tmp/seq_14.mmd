@@ -1,0 +1,14 @@
+sequenceDiagram
+    actor S as 学生
+    participant API as 后端 API
+    participant QUEUE as 消息队列(Redis)
+    participant WORKER as 评测 Worker(Docker)
+    participant DB as MySQL
+
+    S->>API: POST /api/submissions/（设想流程）
+    API->>DB: 创建提交（status=running）
+    API->>QUEUE: 投递评测任务
+    QUEUE->>WORKER: 消费任务
+    WORKER->>WORKER: Docker 运行代码，比对 test_cases
+    WORKER->>DB: 回写 status=success/failed + score + output
+    Note over S,DB: 现状：tasks.py 已有任务雏形但从未被调用，<br/>提交直接置 pending 等待教师评分 → 是否计入验收待教师确认

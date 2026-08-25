@@ -1,0 +1,12 @@
+sequenceDiagram
+    actor T as 教师
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+
+    T->>FE: 作业列表点击"查看提交"或进入作业"提交记录"标签
+    FE->>API: GET /api/submissions/?assignment={id}
+    API->>DB: 查询该作业下、且课程教师为当前用户的提交
+    DB-->>API: 提交列表（学生/时间/状态/得分）
+    API-->>FE: 200 提交列表
+    FE-->>T: 展示表格；点击"评分/详情"查看答案内容

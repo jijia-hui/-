@@ -1,0 +1,12 @@
+sequenceDiagram
+    actor U as 用户
+    participant FE as 前端页面
+    participant API as 后端 API
+    participant DB as MySQL
+
+    U->>FE: 点击头像 → 个人中心
+    FE->>API: GET /api/users/me/（携带 Token）
+    API->>DB: 查询当前用户
+    DB-->>API: 用户信息
+    API-->>FE: 200 用户信息
+    FE-->>U: 展示用户名/邮箱/身份

@@ -1,0 +1,14 @@
+sequenceDiagram
+    actor A as 管理员
+    participant ADM as Django Admin
+    participant ORM as ORM(模型)
+    participant DB as MySQL
+
+    A->>ADM: 登录 /admin/
+    ADM->>DB: 校验管理员身份
+    DB-->>ADM: 通过
+    A->>ADM: 管理用户/课程/作业/提交（增删改查、筛选）
+    ADM->>ORM: 调用模型管理接口
+    ORM->>DB: SQL 读写
+    DB-->>ORM: 结果
+    ADM-->>A: 列表/表单页面更新

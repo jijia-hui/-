@@ -1,0 +1,30 @@
+flowchart LR
+    subgraph BROWSER["浏览器（客户端）"]
+        FE["前端组件 React + Ant Design<br/>(web_frontend)<br/>页面：登录/注册/课程/作业/提交/评分/个人中心"]
+    end
+
+    subgraph BE["后端组件 Django 6 + DRF<br/>(web_backend)"]
+        URL["URL 路由组件<br/>/api/...</>"]
+        VIEW["视图层组件 ViewSet<br/>User/Course/Assignment/Submission"]
+        PERM["权限组件<br/>IsCourseTeacherOrReadOnly"]
+        SER["序列化器组件<br/>User/Course/Assignment/Submission<br/>Serializer"]
+        MODEL["模型层组件 ORM<br/>User/Course/Assignment/Submission"]
+        MAIL["邮件组件<br/>send_mail"]
+    end
+
+    subgraph DATA["数据组件"]
+        MYSQL[("MySQL 数据库<br/>users/courses/assignments/submissions")]
+        MEDIA[("媒体文件存储<br/>media/assignment_refs/")]
+    end
+
+    EXT["外部系统<br/>SMTP 邮件服务器"]
+
+    FE -- "REST API (HTTP/JSON)<br/>Authorization: Token" --> URL
+    URL --> VIEW
+    VIEW --> PERM
+    VIEW --> SER
+    VIEW --> MAIL
+    SER --> MODEL
+    MODEL -- "SQL (PyMySQL)" --> MYSQL
+    MAIL -- "SMTP 465" --> EXT
+    MODEL -- "文件读写" --> MEDIA
