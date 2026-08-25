@@ -32,7 +32,10 @@ const Register = () => {
           <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
             <Input prefix={<UserOutlined />} placeholder="用户名" />
           </Form.Item>
-          <Form.Item name="email" rules={[{ type: 'email', message: '请输入有效邮箱' }]}>
+          <Form.Item name="email" rules={[
+            { required: true, message: '请输入邮箱' },
+            { type: 'email', message: '请输入有效邮箱' },
+          ]}>
             <Input prefix={<MailOutlined />} placeholder="邮箱" />
           </Form.Item>
           <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>

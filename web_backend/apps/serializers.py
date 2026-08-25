@@ -3,6 +3,10 @@ from .models import User, Course, Assignment, Submission
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
+    email = serializers.EmailField(required=True, error_messages={
+        'required': '邮箱为必填项',
+        'invalid': '请输入有效的邮箱地址',
+    })
 
     class Meta:
         model = User
@@ -79,4 +83,4 @@ class SubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = '__all__'
-        read_only_fields = ('created_at', 'status', 'score', 'output')
+        read_only_fields = ('created_at', 'status', 'score', 'output', 'student', 'assignment')

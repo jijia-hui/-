@@ -1,15 +1,21 @@
 from django.shortcuts import render
 
 # Create your views here.
+import logging
+
+from django.core.mail import send_mail
 from django.http import HttpResponse
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.utils import timezone
 from .models import User, Course, Assignment, Submission
 from .serializers import UserSerializer, CourseSerializer, AssignmentSerializer, SubmissionSerializer
-from .permissions import IsTeacherOrReadOnly, IsOwnerOrTeacher
+from .permissions import IsCourseTeacherOrReadOnly
+
+logger = logging.getLogger(__name__)
 
 # 简单的测试视图
 def hello(request):
@@ -24,6 +30,32 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        self._send_registration_email(user)
+
+    def _send_registration_email(self, user):
+        """注册成功后向用户邮箱发送欢迎邮件（发送失败不影响注册结果）"""
+        if not user.email:
+            return
+        try:
+            subject = '注册成功 - 在线教学平台'
+            message = (
+                f'你好，{user.username}！\n\n'
+                '恭喜你成功注册在线教学平台。\n'
+                '请使用注册时的用户名和密码登录系统，开始使用课程与作业功能。\n\n'
+                '此邮件由系统自动发送，请勿回复。'
+            )
+            html_message = (
+                f'<p>你好，<strong>{user.username}</strong>！</p>'
+                '<p>恭喜你成功注册<strong>在线教学平台</strong>。</p>'
+                '<p>请使用注册时的用户名和密码登录系统，开始使用课程与作业功能。</p>'
+                '<p style="color:#999;font-size:12px">此邮件由系统自动发送，请勿回复。</p>'
+            )
+            send_mail(subject, message, None, [user.email], html_message=html_message)
+        except Exception as e:
+            logger.warning('发送注册邮件失败 %s <%s>: %s', user.username, user.email, e)
 
     def get_queryset(self):
         # 普通用户只能看自己，教师和管理员可看所有
@@ -40,7 +72,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     # 空的 queryset 满足 DRF router 要求，实际查询由 get_queryset 动态决定
     queryset = Course.objects.none()
     serializer_class = CourseSerializer
-    permission_classes = [permissions.IsAuthenticated, IsTeacherOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, IsCourseTeacherOrReadOnly]
 
     def get_queryset(self):
         user = self.request.user
@@ -52,21 +84,27 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Course.objects.filter(teacher=user).prefetch_related('students')
         # 学生：看到所有课程（以便选课）
         return Course.objects.all().prefetch_related('students')
-
+    def create(self, request, *args, **kwargs):
+        print("创建课程请求数据:", request.data)
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print("序列化器错误:", serializer.errors)   # 添加这一行
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return super().create(request, *args, **kwargs)
     def perform_create(self, serializer):
         # 自动将当前用户设为课程的教师
         serializer.save(teacher=self.request.user)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def enroll(self, request, pk=None):
-        """学生选课"""
+        """学生选课（选课不属于修改课程，故不要求课程教师权限）"""
         course = self.get_object()
         if request.user.is_teacher:
             return Response({'detail': '教师不能选课'}, status=status.HTTP_400_BAD_REQUEST)
         course.students.add(request.user)
         return Response({'status': 'enrolled'})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unenroll(self, request, pk=None):
         course = self.get_object()
         course.students.remove(request.user)
@@ -75,7 +113,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 class AssignmentViewSet(viewsets.ModelViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
-    permission_classes = [permissions.IsAuthenticated, IsTeacherOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, IsCourseTeacherOrReadOnly]
 
     def get_queryset(self):
         # 根据课程过滤
@@ -113,6 +151,16 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             assignment = Assignment.objects.get(id=assignment_id)
         except Assignment.DoesNotExist:
             return Response({'detail': '作业不存在'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 权限：教师不能提交作业
+        if request.user.is_teacher:
+            return Response({'detail': '教师不能提交作业'}, status=status.HTTP_403_FORBIDDEN)
+        # 权限：必须先选该课程
+        if not assignment.course.students.filter(id=request.user.id).exists():
+            return Response({'detail': '请先选课再提交作业'}, status=status.HTTP_403_FORBIDDEN)
+        # 截止时间校验
+        if assignment.deadline < timezone.now():
+            return Response({'detail': '作业已截止，无法提交'}, status=status.HTTP_400_BAD_REQUEST)
 
         submission = Submission.objects.create(
             assignment=assignment,

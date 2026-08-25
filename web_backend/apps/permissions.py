@@ -1,20 +1,18 @@
 from rest_framework import permissions
+from .models import Course
 
-class IsTeacherOrReadOnly(permissions.BasePermission):
-    """教师可写，其他人只读"""
+
+class IsCourseTeacherOrReadOnly(permissions.BasePermission):
+    """教师可创建，但只有该课程授课教师（或管理员）能修改/删除"""
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
         return request.user.is_authenticated and request.user.is_teacher
 
-class IsOwnerOrTeacher(permissions.BasePermission):
-    """本人或教师可访问"""
     def has_object_permission(self, request, view, obj):
-        if request.user.is_teacher:
+        if request.method in permissions.SAFE_METHODS:
             return True
-        # 假设 obj 有 student 或 user 属性
-        if hasattr(obj, 'student'):
-            return obj.student == request.user
-        if hasattr(obj, 'user'):
-            return obj.user == request.user
-        return obj == request.user
+        if request.user.is_staff:
+            return True
+        course = obj if isinstance(obj, Course) else obj.course
+        return course.teacher == request.user
