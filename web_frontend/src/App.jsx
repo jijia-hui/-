@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Navbar from './components/Navbar'
 import PrivateRoute from './components/PrivateRoute'
 import Login from './pages/Login'
@@ -13,17 +13,18 @@ import Profile from './pages/Profile'
 import SubmissionReview from './pages/SubmissionReview'   // 新增导入
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState(null)
-
-  useEffect(() => {
-    const token = localStorage.getItem('access_token')
+  // 惰性初始化：刷新页面时直接从 localStorage 恢复登录态，避免先渲染未登录态再被重定向
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!(localStorage.getItem('access_token') && localStorage.getItem('user'))
+  })
+  const [user, setUser] = useState(() => {
     const userStr = localStorage.getItem('user')
-    if (token && userStr) {
-      setIsAuthenticated(true)
-      setUser(JSON.parse(userStr))
+    try {
+      return userStr ? JSON.parse(userStr) : null
+    } catch {
+      return null
     }
-  }, [])
+  })
 
   const login = (userData, token) => {
     localStorage.setItem('access_token', token)

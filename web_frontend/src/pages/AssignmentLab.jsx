@@ -2,15 +2,26 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import {
-  Card, Button, message, Spin, Descriptions, Tabs, Table, Upload, Space, Typography, Alert, Modal, InputNumber
+  Card, Button, message, Spin, Descriptions, Tabs, Table, Upload, Space, Typography, Modal, InputNumber, Tag, Empty
 } from 'antd'
 import {
-  UploadOutlined, HistoryOutlined, CheckCircleOutlined, EyeOutlined, SaveOutlined
+  UploadOutlined, HistoryOutlined, CheckCircleOutlined, EyeOutlined, SaveOutlined,
+  InboxOutlined, ClockCircleOutlined, FileTextOutlined
 } from '@ant-design/icons'
 import api from '../api/client'
 
 const { TabPane } = Tabs
-const { Title, Paragraph, Text } = Typography
+const { Paragraph, Text } = Typography
+
+const STATUS_MAP = {
+  graded: { color: 'green', label: '已评分' },
+  pending: { color: 'orange', label: '待评分' },
+}
+
+const StatusTag = ({ status }) => {
+  const conf = STATUS_MAP[status] || { color: 'default', label: status }
+  return <Tag color={conf.color}>{conf.label}</Tag>
+}
 
 const AssignmentLab = ({ user }) => {
   const { assignmentId } = useParams()
@@ -90,40 +101,30 @@ const AssignmentLab = ({ user }) => {
 
   const studentColumns = [
     { title: '提交时间', dataIndex: 'created_at', render: (t) => new Date(t).toLocaleString() },
-    { title: '状态', dataIndex: 'status', render: (s) => {
-      const color = s === 'graded' ? 'green' : s === 'pending' ? 'orange' : 'red'
-      const label = s === 'graded' ? '已评分' : s === 'pending' ? '待评分' : s
-      return <span style={{ color }}>{label}</span>
-    } },
-    { title: '得分', dataIndex: 'score', render: (s) => `${s}分` },
+    { title: '状态', dataIndex: 'status', render: (s) => <StatusTag status={s} /> },
+    { title: '得分', dataIndex: 'score', render: (s) => <Text strong style={{ color: '#4f6ef7' }}>{s} 分</Text> },
   ]
 
   const teacherColumns = [
     { title: '学生', dataIndex: 'student_name', key: 'student_name' },
     { title: '提交时间', dataIndex: 'created_at', render: (t) => new Date(t).toLocaleString() },
-    { title: '状态', dataIndex: 'status', render: (s) => {
-      const color = s === 'graded' ? 'green' : s === 'pending' ? 'orange' : 'red'
-      const label = s === 'graded' ? '已评分' : s === 'pending' ? '待评分' : s
-      return <span style={{ color }}>{label}</span>
-    } },
-    { title: '得分', dataIndex: 'score', render: (s) => `${s}分` },
+    { title: '状态', dataIndex: 'status', render: (s) => <StatusTag status={s} /> },
+    { title: '得分', dataIndex: 'score', render: (s) => <Text strong style={{ color: '#4f6ef7' }}>{s} 分</Text> },
     {
       title: '操作',
       key: 'action',
       render: (_, record) => (
-        <Space>
-          <Button
-            type="link"
-            icon={<EyeOutlined />}
-            onClick={() => {
-              setSelectedSubmission(record)
-              setScoreValue(record.score)
-              setDetailVisible(true)
-            }}
-          >
-            评分/详情
-          </Button>
-        </Space>
+        <Button
+          type="link"
+          icon={<EyeOutlined />}
+          onClick={() => {
+            setSelectedSubmission(record)
+            setScoreValue(record.score)
+            setDetailVisible(true)
+          }}
+        >
+          评分/详情
+        </Button>
       ),
     },
   ]
@@ -145,88 +146,109 @@ const AssignmentLab = ({ user }) => {
     }
   }
 
-  if (loading) return <Spin size="large" style={{ margin: 100 }} />
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 120 }}>
+        <Spin size="large" />
+      </div>
+    )
+  }
+
+  const expired = assignment && new Date() > new Date(assignment.deadline)
 
   return (
-    <div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
-      <Card style={{ borderRadius: 12, marginBottom: 24 }} bodyStyle={{ padding: '24px' }}>
-        <Title level={3}>{assignment?.title}</Title>
-        <Descriptions column={1} style={{ marginTop: 16 }}>
-          <Descriptions.Item label="作业描述">
-            <Paragraph style={{ fontSize: 16 }}>{assignment?.description}</Paragraph>
-          </Descriptions.Item>
-          <Descriptions.Item label="截止时间">
-            <Text strong style={{ color: '#ff4d4f' }}>{new Date(assignment?.deadline).toLocaleString()}</Text>
-          </Descriptions.Item>
-        </Descriptions>
-        {assignment?.reference_file && (
-          <div style={{ marginTop: 16 }}>
-            <Button type="link" href={assignment.reference_file} target="_blank" download>
-              📎 下载参考文档
-            </Button>
+    <div className="page-container">
+      <Card bordered={false} style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <Space size="middle" align="center">
+              <span className="brand-icon-box"><FileTextOutlined /></span>
+              <h1 style={{ margin: 0, fontSize: 22 }}>{assignment?.title}</h1>
+              {expired ? <Tag color="red">已截止</Tag> : <Tag color="green">进行中</Tag>}
+            </Space>
+            <Paragraph style={{ marginTop: 16, fontSize: 15, color: '#3c4356', maxWidth: 760 }}>
+              {assignment?.description}
+            </Paragraph>
           </div>
-        )}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 4 }}>
+              <ClockCircleOutlined /> 截止时间
+            </div>
+            <Text strong style={{ color: expired ? '#ff4d4f' : '#1f2430', fontSize: 16 }}>
+              {new Date(assignment?.deadline).toLocaleString()}
+            </Text>
+            {assignment?.reference_file && (
+              <div style={{ marginTop: 10 }}>
+                <Button type="link" href={assignment.reference_file} target="_blank" download style={{ padding: 0 }}>
+                  📎 下载参考文档
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </Card>
 
-      <Tabs defaultActiveKey={isTeacher ? "history" : "submit"} size="large">
-        {!isTeacher && (
-          <TabPane tab={<span><UploadOutlined /> 提交作业</span>} key="submit">
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <Upload
-                beforeUpload={handleFileUpload}
-                showUploadList={false}
-                accept=".txt,.md,.markdown,.py,.java,.c,.cpp,.js,.go,.rs,.cs,.php,.rb,.pl,.sh,.json,.xml,.html,.css"
-              >
-                <Button icon={<UploadOutlined />} loading={uploadLoading} size="large">
-                  选择文件
+      <Card bordered={false}>
+        <Tabs defaultActiveKey={isTeacher ? "history" : "submit"} size="large">
+          {!isTeacher && (
+            <TabPane tab={<span><UploadOutlined /> 提交作业</span>} key="submit">
+              <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                <Upload
+                  beforeUpload={handleFileUpload}
+                  showUploadList={false}
+                  accept=".txt,.md,.markdown,.py,.java,.c,.cpp,.js,.go,.rs,.cs,.php,.rb,.pl,.sh,.json,.xml,.html,.css"
+                >
+                  <div className="upload-dropzone">
+                    <span className="dz-icon"><InboxOutlined /></span>
+                    <span className="dz-title">点击选择文件上传</span>
+                    <span className="dz-hint">
+                      支持文本格式文件（.txt, .md, .py, .java, .c, .js 等），文件内容将作为答案提交
+                    </span>
+                  </div>
+                </Upload>
+                {fileName && (
+                  <div className="file-ready-box">
+                    <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 18 }} />
+                    <div>
+                      <Text strong>已加载文件：{fileName}</Text>
+                      <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
+                        文件内容已准备就绪，点击下方按钮提交
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <Button
+                  type="primary"
+                  onClick={handleSubmit}
+                  loading={submitting || uploadLoading}
+                  disabled={!fileContent}
+                  size="large"
+                  icon={<UploadOutlined />}
+                  style={{ width: 220, height: 46, borderRadius: 23 }}
+                >
+                  提交作业
                 </Button>
-              </Upload>
-              <div style={{ color: '#8c8c8c', fontSize: 12 }}>
-                支持文本格式文件（.txt, .md, .py, .java, .c, .js 等），文件内容将作为答案提交。
-              </div>
-              {fileName && (
-                <div style={{ padding: 16, background: '#f6ffed', borderRadius: 8, border: '1px solid #b7eb8f' }}>
-                  <CheckCircleOutlined style={{ color: '#52c41a', marginRight: 8 }} />
-                  <Text strong>已加载文件：{fileName}</Text>
-                  <Paragraph style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-                    文件内容已准备就绪，点击下方按钮提交。
-                  </Paragraph>
-                </div>
-              )}
-              <Button
-                type="primary"
-                onClick={handleSubmit}
-                loading={submitting}
-                disabled={!fileContent}
-                size="large"
-                style={{ width: 200 }}
-              >
-                提交作业
-              </Button>
-            </Space>
-          </TabPane>
-        )}
-
-        <TabPane tab={<span><HistoryOutlined /> 提交记录</span>} key="history">
-          {submissions.length === 0 ? (
-            <Alert
-              message="暂无提交记录"
-              description={isTeacher ? "还没有学生提交作业。" : "您还没有提交过作业，请上传文件后提交。"}
-              type="info"
-              showIcon
-              style={{ marginTop: 16 }}
-            />
-          ) : (
-            <Table
-              dataSource={submissions}
-              columns={isTeacher ? teacherColumns : studentColumns}
-              rowKey="id"
-              pagination={{ pageSize: 8 }}
-              style={{ marginTop: 16 }}
-            />
+              </Space>
+            </TabPane>
           )}
-        </TabPane>
-      </Tabs>
+
+          <TabPane tab={<span><HistoryOutlined /> 提交记录</span>} key="history">
+            {submissions.length === 0 ? (
+              <Empty
+                className="empty-state"
+                description={isTeacher ? '还没有学生提交作业' : '您还没有提交过作业，请上传文件后提交'}
+              />
+            ) : (
+              <Table
+                dataSource={submissions}
+                columns={isTeacher ? teacherColumns : studentColumns}
+                rowKey="id"
+                pagination={{ pageSize: 8 }}
+              />
+            )}
+          </TabPane>
+        </Tabs>
+      </Card>
 
       <Modal
         title="评分与详情"
@@ -240,23 +262,21 @@ const AssignmentLab = ({ user }) => {
             <Descriptions column={2} bordered size="small">
               <Descriptions.Item label="学生">{selectedSubmission.student_name}</Descriptions.Item>
               <Descriptions.Item label="提交时间">{new Date(selectedSubmission.created_at).toLocaleString()}</Descriptions.Item>
-              <Descriptions.Item label="状态">
-                <span style={{ color: selectedSubmission.status === 'graded' ? 'green' : 'orange' }}>
-                  {selectedSubmission.status === 'graded' ? '已评分' : '待评分'}
-                </span>
+              <Descriptions.Item label="状态"><StatusTag status={selectedSubmission.status} /></Descriptions.Item>
+              <Descriptions.Item label="当前得分">
+                <Text strong style={{ color: '#4f6ef7' }}>{selectedSubmission.score} 分</Text>
               </Descriptions.Item>
-              <Descriptions.Item label="当前得分">{selectedSubmission.score}分</Descriptions.Item>
             </Descriptions>
-            <div style={{ marginTop: 16 }}>
+            <div style={{ marginTop: 20 }}>
               <Text strong>提交的答案：</Text>
-              <pre style={{ background: '#f6f6f6', padding: 12, borderRadius: 8, overflow: 'auto', maxHeight: 400 }}>
+              <pre className="code-view" style={{ marginTop: 8 }}>
                 {selectedSubmission.code}
               </pre>
             </div>
             {selectedSubmission.output && (
               <div style={{ marginTop: 16 }}>
                 <Text strong>系统输出：</Text>
-                <pre style={{ background: '#f6f6f6', padding: 12, borderRadius: 8, overflow: 'auto' }}>
+                <pre className="code-view" style={{ marginTop: 8, maxHeight: 240 }}>
                   {selectedSubmission.output}
                 </pre>
               </div>
@@ -271,8 +291,9 @@ const AssignmentLab = ({ user }) => {
                     value={scoreValue}
                     onChange={(val) => setScoreValue(val)}
                     style={{ width: 120 }}
+                    size="large"
                   />
-                  <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveGrade} loading={submittingGrade}>
+                  <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveGrade} loading={submittingGrade} size="large">
                     保存分数
                   </Button>
                 </Space>

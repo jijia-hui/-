@@ -1,11 +1,17 @@
 // src/pages/SubmissionReview.jsx
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { Card, Table, Button, Spin, message, Tag, Space, Modal, Typography, Descriptions, InputNumber } from 'antd'
+import { Card, Table, Button, Spin, message, Tag, Space, Modal, Typography, Descriptions, InputNumber, Empty } from 'antd'
 import { ArrowLeftOutlined, EyeOutlined, SaveOutlined } from '@ant-design/icons'
 import api from '../api/client'
 
 const { Text } = Typography
+
+const StatusTag = ({ status }) => (
+  <Tag color={status === 'graded' ? 'green' : 'orange'}>
+    {status === 'graded' ? '已评分' : '待评分'}
+  </Tag>
+)
 
 const SubmissionReview = () => {
   const { assignmentId } = useParams()
@@ -57,11 +63,13 @@ const SubmissionReview = () => {
     }
   }
 
+  const gradedCount = submissions.filter(s => s.status === 'graded').length
+
   const columns = [
-    { title: '学生', dataIndex: 'student_name', key: 'student_name' },
+    { title: '学生', dataIndex: 'student_name', key: 'student_name', render: (t) => <Text strong>{t}</Text> },
     { title: '提交时间', dataIndex: 'created_at', render: (t) => new Date(t).toLocaleString() },
-    { title: '状态', dataIndex: 'status', render: (s) => <Tag color={s === 'graded' ? 'green' : 'orange'}>{s}</Tag> },
-    { title: '得分', dataIndex: 'score', render: (s) => `${s}分` },
+    { title: '状态', dataIndex: 'status', render: (s) => <StatusTag status={s} /> },
+    { title: '得分', dataIndex: 'score', render: (s) => <Text strong style={{ color: '#4f6ef7' }}>{s} 分</Text> },
     {
       title: '操作',
       key: 'action',
@@ -74,13 +82,27 @@ const SubmissionReview = () => {
   ]
 
   return (
-    <div style={{ padding: 24 }}>
-      <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
-        返回
-      </Button>
-      <Card title={`作业提交记录 - ${assignment?.title || '加载中...'}`}>
+    <div className="page-container">
+      <div className="page-header">
+        <div className="page-header-text">
+          <h1>作业提交批改</h1>
+          <div className="page-subtitle">
+            {assignment?.title || '加载中...'} · 共 {submissions.length} 份提交，已批改 {gradedCount} 份
+          </div>
+        </div>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+          返回
+        </Button>
+      </div>
+      <Card bordered={false}>
         <Spin spinning={loading}>
-          <Table dataSource={submissions} columns={columns} rowKey="id" pagination={{ pageSize: 10 }} />
+          <Table
+            dataSource={submissions}
+            columns={columns}
+            rowKey="id"
+            pagination={{ pageSize: 10, showTotal: (total) => `共 ${total} 份提交` }}
+            locale={{ emptyText: <Empty className="empty-state" description="暂无学生提交" /> }}
+          />
         </Spin>
       </Card>
 
@@ -96,28 +118,26 @@ const SubmissionReview = () => {
             <Descriptions column={2} bordered size="small">
               <Descriptions.Item label="学生">{selectedSubmission.student_name}</Descriptions.Item>
               <Descriptions.Item label="提交时间">{new Date(selectedSubmission.created_at).toLocaleString()}</Descriptions.Item>
-              <Descriptions.Item label="状态">
-                <Tag color={selectedSubmission.status === 'graded' ? 'green' : 'orange'}>{selectedSubmission.status}</Tag>
-              </Descriptions.Item>
+              <Descriptions.Item label="状态"><StatusTag status={selectedSubmission.status} /></Descriptions.Item>
               <Descriptions.Item label="当前得分">
-                {selectedSubmission.score}分
+                <Text strong style={{ color: '#4f6ef7' }}>{selectedSubmission.score} 分</Text>
               </Descriptions.Item>
             </Descriptions>
-            <div style={{ marginTop: 16 }}>
+            <div style={{ marginTop: 20 }}>
               <Text strong>提交的代码：</Text>
-              <pre style={{ background: '#f6f6f6', padding: 12, borderRadius: 8, overflow: 'auto', maxHeight: 300 }}>
+              <pre className="code-view" style={{ marginTop: 8 }}>
                 {selectedSubmission.code}
               </pre>
             </div>
             {selectedSubmission.output && (
               <div style={{ marginTop: 16 }}>
                 <Text strong>系统输出：</Text>
-                <pre style={{ background: '#f6f6f6', padding: 12, borderRadius: 8, overflow: 'auto' }}>
+                <pre className="code-view" style={{ marginTop: 8, maxHeight: 240 }}>
                   {selectedSubmission.output}
                 </pre>
               </div>
             )}
-            <div style={{ marginTop: 24 }}>
+            <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
               <Text strong>教师评分（0-100）：</Text>
               <Space style={{ marginTop: 8 }}>
                 <InputNumber
@@ -126,8 +146,9 @@ const SubmissionReview = () => {
                   value={scoreValue}
                   onChange={(val) => setScoreValue(val)}
                   style={{ width: 120 }}
+                  size="large"
                 />
-                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveGrade} loading={submittingGrade}>
+                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveGrade} loading={submittingGrade} size="large">
                   保存分数
                 </Button>
               </Space>

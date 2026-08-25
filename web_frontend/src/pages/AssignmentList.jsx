@@ -227,35 +227,34 @@ const AssignmentList = ({ user }) => {
   }
 
   return (
-    <div style={{ padding: 24 }}>
+    <div className="page-container">
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/courses/${courseId}`)}>
-          返回课程
-        </Button>
-
-        <Card
-          title={
-            <Space>
-              <span>📋 {course?.name} - 作业列表</span>
-              {isTeacher && (
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
-                  新建作业
-                </Button>
-              )}
-            </Space>
-          }
-          bordered={false}
-          extra={
+        <div className="page-header" style={{ marginBottom: 0 }}>
+          <div className="page-header-text">
+            <h1>{course?.name} · 作业列表</h1>
+            <div className="page-subtitle">共 {filteredAssignments.length} 个作业，按截止时间排序</div>
+          </div>
+          <Space>
             <AntInput
               placeholder="搜索作业标题或描述"
-              prefix={<SearchOutlined />}
+              prefix={<SearchOutlined style={{ color: '#9aa3b8' }} />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 240 }}
+              style={{ width: 240, borderRadius: 20 }}
               allowClear
             />
-          }
-        >
+            {isTeacher && (
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
+                新建作业
+              </Button>
+            )}
+            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/courses/${courseId}`)}>
+              返回课程
+            </Button>
+          </Space>
+        </div>
+
+        <Card bordered={false}>
           <Table
             columns={columns}
             dataSource={filteredAssignments}

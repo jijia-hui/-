@@ -1,4 +1,24 @@
-/* 全局样式 - 现代化、毛玻璃、动效 */
+/* ============================================================
+   全局设计系统 - 在线教学平台
+   品牌色：靛蓝 → 青蓝 渐变，柔和阴影，统一圆角与动效
+   ============================================================ */
+
+:root {
+  --brand-primary: #4f6ef7;
+  --brand-primary-deep: #3b54d9;
+  --brand-accent: #22c1c3;
+  --brand-gradient: linear-gradient(135deg, #4f6ef7 0%, #22c1c3 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(79, 110, 247, 0.12) 0%, rgba(34, 193, 195, 0.12) 100%);
+  --page-bg: #f3f5fb;
+  --text-main: #1f2430;
+  --text-secondary: #6b7280;
+  --shadow-sm: 0 1px 2px rgba(31, 41, 55, 0.06);
+  --shadow-card: 0 2px 8px rgba(31, 41, 55, 0.06), 0 12px 32px -12px rgba(31, 41, 55, 0.12);
+  --shadow-card-hover: 0 8px 16px rgba(79, 110, 247, 0.10), 0 24px 48px -16px rgba(79, 110, 247, 0.22);
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -7,36 +27,42 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f0f2f5;
+  color: var(--text-main);
+  background-color: var(--page-bg);
+  /* 细腻的网格光斑背景 */
+  background-image:
+    radial-gradient(at 12% 8%, rgba(79, 110, 247, 0.08) 0px, transparent 50%),
+    radial-gradient(at 88% 0%, rgba(34, 193, 195, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(124, 108, 247, 0.06) 0px, transparent 55%);
+  background-attachment: fixed;
 }
 
-/* 自定义滚动条 */
+/* ---------- 自定义滚动条 ---------- */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #c8cede;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #a8b0c8;
 }
 
-/* 页面入场动画 */
+/* ---------- 页面入场动画 ---------- */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -44,90 +70,547 @@ body {
   }
 }
 .fade-in-up {
-  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* 卡片悬停效果 */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ---------- 通用页面容器与页头 ---------- */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+  animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.page-header-text h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.page-header-text .page-subtitle {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ---------- 品牌渐变文字与图标 ---------- */
+.brand-gradient-text {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--brand-gradient);
+  color: #fff;
+  font-size: 20px;
+  box-shadow: 0 6px 16px -4px rgba(79, 110, 247, 0.45);
+}
+
+/* ---------- Ant Design 组件全局微调 ---------- */
+
+/* 卡片 */
 .ant-card {
-  transition: all 0.3s ease;
-  border-radius: 12px;
-  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(229, 231, 240, 0.9);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-.ant-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+.ant-card .ant-card-head {
+  border-bottom-color: #f0f1f6;
+  min-height: 56px;
+}
+.ant-card .ant-card-head-title {
+  font-weight: 600;
+  font-size: 16px;
 }
 
-/* 表格样式优化 */
+/* 可悬停卡片（课程卡片等） */
+.card-hoverable:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgba(79, 110, 247, 0.35);
+}
+
+/* 表格 */
 .ant-table {
-  border-radius: 12px;
-  overflow: hidden;
+  border-radius: var(--radius-md);
 }
 .ant-table-thead > tr > th {
-  background-color: #fafafa;
+  background: #f7f8fc !important;
   font-weight: 600;
+  color: #3c4356;
+}
+.ant-table-thead > tr > th::before {
+  display: none;
+}
+.ant-table-tbody > tr {
+  transition: background 0.2s ease;
 }
 .ant-table-tbody > tr:hover > td {
-  background-color: #f5f5f5;
+  background: #f5f7ff !important;
 }
 
-/* 按钮样式微调 */
+/* 按钮 */
+.ant-btn {
+  transition: all 0.2s ease;
+}
 .ant-btn-primary {
-  box-shadow: 0 2px 0 rgba(5, 145, 255, 0.1);
-  transition: all 0.2s;
+  background: var(--brand-gradient);
+  border: none;
+  box-shadow: 0 4px 12px -2px rgba(79, 110, 247, 0.45);
+  font-weight: 500;
 }
 .ant-btn-primary:hover {
-  background: #4096ff;
+  background: linear-gradient(135deg, #5f7cf8 0%, #2ecbd0 100%) !important;
   transform: translateY(-1px);
+  box-shadow: 0 8px 18px -4px rgba(79, 110, 247, 0.5) !important;
+}
+.ant-btn-primary:active {
+  transform: translateY(0);
+}
+.ant-btn-default:hover {
+  border-color: var(--brand-primary) !important;
+  color: var(--brand-primary) !important;
 }
 .ant-btn-text:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(79, 110, 247, 0.08) !important;
 }
 
-/* 标签样式 */
+/* 标签 */
 .ant-tag {
-  border-radius: 16px;
-  padding: 0 12px;
+  border-radius: 20px;
+  padding: 1px 12px;
   font-size: 12px;
-  line-height: 24px;
+  line-height: 22px;
+  border: none;
+  font-weight: 500;
 }
 
-/* 模态框圆角 */
+/* 模态框 / 下拉 / 抽屉 */
 .ant-modal-content {
-  border-radius: 16px;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden;
 }
-
-/* 下拉菜单圆角 */
+.ant-modal-header {
+  padding-bottom: 12px;
+}
 .ant-dropdown-menu {
-  border-radius: 12px;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-card) !important;
+  padding: 6px !important;
+}
+.ant-dropdown-menu-item {
+  border-radius: 8px !important;
 }
 
-/* 布局容器统一背景 */
+/* 表单输入 */
+.ant-input-affix-wrapper,
+.ant-input,
+.ant-input-number,
+.ant-picker,
+.ant-select .ant-select-selector {
+  border-radius: 10px !important;
+}
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused,
+.ant-input:focus,
+.ant-picker-focused,
+.ant-select-focused .ant-select-selector {
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12) !important;
+}
+
+/* 布局 */
 .ant-layout {
-  background: #f0f2f5;
+  background: transparent;
 }
 .ant-layout-header {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02);
-  padding: 0 48px;
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 rgba(229, 231, 240, 0.9), 0 4px 24px -8px rgba(31, 41, 55, 0.08);
+  padding: 0 40px;
+  height: 64px;
+  line-height: 64px;
 }
 .ant-layout-content {
-  padding: 24px 48px;
   min-height: calc(100vh - 64px);
 }
 
-/* 导航菜单项悬停 */
-.ant-menu-item:hover {
-  color: #1677ff !important;
+/* 导航菜单 */
+.ant-menu {
+  background: transparent;
+}
+.ant-menu-horizontal {
+  line-height: 62px;
+}
+.ant-menu-horizontal .ant-menu-item {
+  border-radius: 10px;
+  margin: 0 4px;
+}
+.ant-menu-horizontal .ant-menu-item::after {
+  display: none !important;
+}
+.ant-menu-horizontal .ant-menu-item-selected {
+  background: var(--brand-gradient-soft);
+  color: var(--brand-primary) !important;
+  font-weight: 600;
+}
+.ant-menu-horizontal .ant-menu-item:hover {
+  color: var(--brand-primary) !important;
 }
 
-/* 响应式调整 */
+/* Tabs */
+.ant-tabs-tab {
+  font-weight: 500;
+}
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--brand-primary) !important;
+}
+.ant-tabs-ink-bar {
+  background: var(--brand-gradient) !important;
+  height: 3px !important;
+  border-radius: 3px;
+}
+
+/* 分页 */
+.ant-pagination .ant-pagination-item-active {
+  border-color: var(--brand-primary);
+}
+.ant-pagination .ant-pagination-item-active a {
+  color: var(--brand-primary);
+}
+
+/* Descriptions */
+.ant-descriptions-item-label {
+  color: var(--text-secondary) !important;
+}
+
+/* ---------- 登录 / 注册页 ---------- */
+.auth-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.auth-page::before,
+.auth-page::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.auth-page::before {
+  width: 420px;
+  height: 420px;
+  background: rgba(79, 110, 247, 0.35);
+  top: -120px;
+  left: -100px;
+}
+.auth-page::after {
+  width: 380px;
+  height: 380px;
+  background: rgba(34, 193, 195, 0.3);
+  bottom: -120px;
+  right: -80px;
+}
+
+.auth-card {
+  width: 420px;
+  max-width: 100%;
+  position: relative;
+  z-index: 1;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 64px -16px rgba(31, 41, 55, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(16px);
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.auth-card .ant-card-body {
+  padding: 40px 40px 32px;
+}
+.auth-brand {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.auth-brand .brand-icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  font-size: 28px;
+  margin-bottom: 14px;
+}
+.auth-brand h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+.auth-brand p {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.auth-card .ant-input-affix-wrapper,
+.auth-card .ant-input {
+  padding: 10px 14px;
+}
+.auth-card .ant-btn-primary {
+  height: 44px;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+/* ---------- 课程卡片 ---------- */
+.course-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.course-card .ant-card-body {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.course-card .ant-card-actions {
+  background: #fafbfe;
+  border-top-color: #f0f1f6;
+}
+.course-cover {
+  height: 96px;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px 20px;
+  position: relative;
+  background: var(--brand-gradient);
+  background-size: 160% 160%;
+  animation: gradientShift 8s ease infinite;
+}
+.course-cover .course-code {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 2px 10px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+.course-cover .course-role-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+.course-info {
+  padding: 16px 20px 12px;
+  flex: 1;
+}
+.course-info h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.course-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.course-meta .meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- 详情页头部横幅 ---------- */
+.detail-banner {
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  color: #fff;
+  background: var(--brand-gradient);
+  background-size: 160% 160%;
+  animation: gradientShift 10s ease infinite;
+  box-shadow: 0 16px 40px -16px rgba(79, 110, 247, 0.55);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.detail-banner::after {
+  content: '';
+  position: absolute;
+  right: -60px;
+  top: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+.detail-banner h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+.detail-banner .banner-sub {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ---------- 上传区域 ---------- */
+.upload-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 36px 24px;
+  border: 2px dashed #c9d2f5;
+  border-radius: var(--radius-lg);
+  background: rgba(79, 110, 247, 0.03);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  text-align: center;
+}
+.upload-dropzone:hover {
+  border-color: var(--brand-primary);
+  background: rgba(79, 110, 247, 0.06);
+}
+.upload-dropzone .dz-icon {
+  font-size: 36px;
+  color: var(--brand-primary);
+}
+.upload-dropzone .dz-title {
+  font-weight: 600;
+}
+.upload-dropzone .dz-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* 文件已就绪提示 */
+.file-ready-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(82, 196, 26, 0.08), rgba(82, 196, 26, 0.03));
+  border: 1px solid rgba(82, 196, 26, 0.35);
+  border-radius: var(--radius-md);
+}
+
+/* ---------- 代码展示 ---------- */
+.code-view {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  overflow: auto;
+  max-height: 420px;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: 'Fira Code', Consolas, 'Courier New', monospace;
+}
+
+/* ---------- 个人中心 ---------- */
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 32px;
+  border-radius: var(--radius-lg);
+  background: var(--brand-gradient);
+  background-size: 160% 160%;
+  animation: gradientShift 10s ease infinite;
+  color: #fff;
+  box-shadow: 0 16px 40px -16px rgba(79, 110, 247, 0.55);
+  margin-bottom: 24px;
+}
+.profile-hero .ant-avatar {
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+.profile-hero h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #fff;
+}
+.profile-hero .hero-sub {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.profile-role-tag {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  border-radius: 20px;
+  padding: 1px 12px;
+  font-size: 12px;
+}
+
+/* ---------- 空状态 ---------- */
+.empty-state {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* ---------- 响应式 ---------- */
 @media (max-width: 768px) {
   .ant-layout-header {
-    padding: 0 24px;
+    padding: 0 16px;
   }
-  .ant-layout-content {
-    padding: 16px 24px;
+  .page-container {
+    padding: 20px 16px 40px;
+  }
+  .auth-card .ant-card-body {
+    padding: 28px 24px 24px;
+  }
+  .detail-banner,
+  .profile-hero {
+    padding: 20px;
   }
 }

@@ -13,10 +13,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         locale={zhCN}
         theme={{
           token: {
-            colorPrimary: '#1677ff',
-            borderRadius: 8,
+            colorPrimary: '#4f6ef7',
+            colorInfo: '#4f6ef7',
+            colorLink: '#4f6ef7',
+            borderRadius: 10,
             colorBgContainer: '#ffffff',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+            colorText: '#1f2430',
+            colorTextSecondary: '#6b7280',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif',
           },
           components: {
             Layout: {
@@ -24,10 +28,19 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               siderBg: '#f5f5f5',
             },
             Card: {
-              borderRadiusLG: 12,
+              borderRadiusLG: 16,
             },
             Table: {
               borderRadius: 12,
+              headerBg: '#f7f8fc',
+            },
+            Menu: {
+              itemBg: 'transparent',
+            },
+            Tabs: {
+              inkBarColor: '#4f6ef7',
+              itemSelectedColor: '#4f6ef7',
+              itemHoverColor: '#4f6ef7',
             },
           }
         }}
