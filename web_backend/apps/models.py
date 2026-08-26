@@ -63,6 +63,10 @@ class Assignment(models.Model):
     def __str__(self):
         return f"{self.course.name} - {self.title}"
 
+    def is_expired(self):
+        """作业是否已过截止时间（提交校验的业务规则，供视图与单元测试复用）"""
+        return self.deadline < timezone.now()
+
 
 class Submission(models.Model):
     """代码提交记录"""

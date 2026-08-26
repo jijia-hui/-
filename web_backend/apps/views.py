@@ -159,7 +159,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         if not assignment.course.students.filter(id=request.user.id).exists():
             return Response({'detail': '请先选课再提交作业'}, status=status.HTTP_403_FORBIDDEN)
         # 截止时间校验
-        if assignment.deadline < timezone.now():
+        if assignment.is_expired():
             return Response({'detail': '作业已截止，无法提交'}, status=status.HTTP_400_BAD_REQUEST)
 
         submission = Submission.objects.create(
