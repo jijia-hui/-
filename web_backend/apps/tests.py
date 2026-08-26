@@ -22,14 +22,12 @@ class BaseAPITestCase(TestCase):
             title='作业一',
             description='描述',
             deadline=timezone.now() + timedelta(days=1),
-            test_cases=[],
         )
         self.expired = Assignment.objects.create(
             course=self.course,
             title='过期作业',
             description='描述',
             deadline=timezone.now() - timedelta(days=1),
-            test_cases=[],
         )
 
     def client_for(self, user):
@@ -40,6 +38,12 @@ class BaseAPITestCase(TestCase):
 
 
 class CoursePermissionTest(BaseAPITestCase):
+    def test_teacher_can_edit_own_course(self):
+        res = self.client_for(self.teacher).patch(
+            f'/api/courses/{self.course.id}/', {'name': '新名称'})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data['name'], '新名称')
+
     def test_teacher_can_delete_own_course(self):
         res = self.client_for(self.teacher).delete(f'/api/courses/{self.course.id}/')
         self.assertEqual(res.status_code, 204)
@@ -57,6 +61,11 @@ class CoursePermissionTest(BaseAPITestCase):
     def test_enroll_still_works_for_student(self):
         res = self.client_for(self.other).post(f'/api/courses/{self.course.id}/enroll/')
         self.assertEqual(res.status_code, 200)
+
+    def test_student_can_unenroll(self):
+        res = self.client_for(self.student).post(f'/api/courses/{self.course.id}/unenroll/')
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(self.course.students.filter(id=self.student.id).exists())
 
 
 class AssignmentPermissionTest(BaseAPITestCase):

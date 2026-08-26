@@ -101,7 +101,6 @@ _, assign = req('POST', '/api/assignments/', {
     'course': course_id,
     'title': f'冒烟作业{SUFFIX}',
     'description': '测试作业描述',
-    'test_cases': [],
     'deadline': '2026-08-30T23:59:59Z',
 }, token=tea_tok, expect=201, name='UC06 教师创建作业')
 assign_id = assign['id']
@@ -129,7 +128,6 @@ _, expired = req('POST', '/api/assignments/', {
     'course': course_id,
     'title': f'过期作业{SUFFIX}',
     'description': '已过期',
-    'test_cases': [],
     'deadline': '2026-08-01T00:00:00Z',
 }, token=tea_tok, expect=201, name='UC06 创建过期作业')
 req('POST', '/api/submissions/', {

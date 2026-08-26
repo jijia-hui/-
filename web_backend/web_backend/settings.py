@@ -92,12 +92,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
-# Celery 配置（需要安装 redis）
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-
 # 自定义用户模型
 AUTH_USER_MODEL = 'apps.User'
 # Database

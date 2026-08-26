@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Card, Row, Col, Button, Spin, message, Tag, Modal, Form, Input, Empty } from 'antd'
-import { PlusOutlined, UserAddOutlined, UserOutlined, TeamOutlined, RightOutlined } from '@ant-design/icons'
+import { Card, Row, Col, Button, Spin, message, Tag, Modal, Form, Input, Empty, Popconfirm } from 'antd'
+import { PlusOutlined, UserAddOutlined, UserDeleteOutlined, UserOutlined, TeamOutlined, RightOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
 
@@ -18,6 +18,7 @@ const CourseList = ({ user }) => {
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
   const [createModal, setCreateModal] = useState(false)
+  const [editingCourse, setEditingCourse] = useState(null)
   const [form] = Form.useForm()
   const navigate = useNavigate()
 
@@ -36,15 +37,37 @@ const CourseList = ({ user }) => {
     fetchCourses()
   }, [])
 
-  const handleCreate = async (values) => {
+  const openCreateModal = () => {
+    setEditingCourse(null)
+    form.resetFields()
+    setCreateModal(true)
+  }
+
+  const openEditModal = (course) => {
+    setEditingCourse(course)
+    form.setFieldsValue({
+      name: course.name,
+      code: course.code,
+      description: course.description,
+    })
+    setCreateModal(true)
+  }
+
+  const handleSubmit = async (values) => {
     try {
-      await api.post('/courses/', values)
-      message.success('课程创建成功')
+      if (editingCourse) {
+        await api.patch(`/courses/${editingCourse.id}/`, values)
+        message.success('课程更新成功')
+      } else {
+        await api.post('/courses/', values)
+        message.success('课程创建成功')
+      }
       setCreateModal(false)
+      setEditingCourse(null)
       form.resetFields()
       fetchCourses()
     } catch (error) {
-      message.error('创建失败')
+      message.error(editingCourse ? '更新失败' : '创建失败')
     }
   }
 
@@ -58,6 +81,26 @@ const CourseList = ({ user }) => {
     }
   }
 
+  const handleUnenroll = async (courseId) => {
+    try {
+      await api.post(`/courses/${courseId}/unenroll/`)
+      message.success('退课成功')
+      fetchCourses()  // 刷新列表，is_enrolled 会变为 false
+    } catch (error) {
+      message.error('退课失败')
+    }
+  }
+
+  const handleDelete = async (courseId) => {
+    try {
+      await api.delete(`/courses/${courseId}/`)
+      message.success('课程删除成功')
+      fetchCourses()
+    } catch (error) {
+      message.error('删除失败')
+    }
+  }
+
   return (
     <div className="page-container">
       <div className="page-header">
@@ -66,7 +109,7 @@ const CourseList = ({ user }) => {
           <div className="page-subtitle">共 {courses.length} 门课程，点击卡片进入课程详情</div>
         </div>
         {user?.is_teacher && (
-          <Button type="primary" icon={<PlusOutlined />} size="large" onClick={() => setCreateModal(true)}>
+          <Button type="primary" icon={<PlusOutlined />} size="large" onClick={openCreateModal}>
             创建课程
           </Button>
         )}
@@ -106,7 +149,20 @@ const CourseList = ({ user }) => {
                       </Button>,
                       !user?.is_teacher && !course.is_enrolled && (
                         <Button type="link" key="enroll" icon={<UserAddOutlined />} onClick={() => handleEnroll(course.id)}>选课</Button>
-                      )
+                      ),
+                      !user?.is_teacher && course.is_enrolled && (
+                        <Popconfirm key="unenroll" title="确定退选该课程吗？" onConfirm={() => handleUnenroll(course.id)} okText="确定" cancelText="取消">
+                          <Button type="link" danger icon={<UserDeleteOutlined />}>退课</Button>
+                        </Popconfirm>
+                      ),
+                      course.teacher_name === user?.username && (
+                        <Button type="link" key="edit" icon={<EditOutlined />} onClick={() => openEditModal(course)}>编辑</Button>
+                      ),
+                      course.teacher_name === user?.username && (
+                        <Popconfirm key="delete" title="确定删除该课程吗？其下作业与提交将一并删除" onConfirm={() => handleDelete(course.id)} okText="确定" cancelText="取消">
+                          <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
+                        </Popconfirm>
+                      ),
                     ].filter(Boolean)}
                   >
                     <div className="course-cover" style={{ background: COVER_GRADIENTS[idx % COVER_GRADIENTS.length] }}>
@@ -131,12 +187,15 @@ const CourseList = ({ user }) => {
       </Spin>
 
       <Modal
-        title="创建课程"
+        title={editingCourse ? '编辑课程' : '创建课程'}
         open={createModal}
-        onCancel={() => setCreateModal(false)}
+        onCancel={() => {
+          setCreateModal(false)
+          setEditingCourse(null)
+        }}
         footer={null}
       >
-        <Form form={form} onFinish={handleCreate} layout="vertical">
+        <Form form={form} onFinish={handleSubmit} layout="vertical">
           <Form.Item name="name" label="课程名称" rules={[{ required: true, message: '请输入课程名称' }]}>
             <Input placeholder="例如：Python 程序设计" />
           </Form.Item>
@@ -147,7 +206,9 @@ const CourseList = ({ user }) => {
             <Input.TextArea rows={4} placeholder="简要介绍课程内容、目标与要求..." />
           </Form.Item>
           <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="primary" htmlType="submit" block size="large">创建</Button>
+            <Button type="primary" htmlType="submit" block size="large">
+              {editingCourse ? '保存' : '创建'}
+            </Button>
           </Form.Item>
         </Form>
       </Modal>

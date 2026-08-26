@@ -7,7 +7,6 @@ const { Text } = Typography
 const STATUS_MAP = {
   graded: { color: 'green', label: '已评分' },
   pending: { color: 'orange', label: '待评分' },
-  success: { color: 'green', label: '已完成' },
 }
 
 const SubmissionHistory = () => {

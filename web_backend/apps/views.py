@@ -166,7 +166,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             assignment=assignment,
             student=request.user,
             code=code,
-            status='pending',      # 改为 pending，等待评分
+            status='pending',      # 待教师评分
             score=0,
             output='等待教师评分。'
         )

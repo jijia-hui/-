@@ -44,7 +44,6 @@ class Assignment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments', verbose_name="所属课程")
     title = models.CharField(max_length=200, verbose_name="作业标题")
     description = models.TextField(verbose_name="作业描述")
-    test_cases = models.JSONField(default=list, verbose_name="测试用例")
     deadline = models.DateTimeField(verbose_name="截止时间")
     reference_file = models.FileField(
         upload_to='assignment_refs/',
@@ -68,18 +67,15 @@ class Assignment(models.Model):
 class Submission(models.Model):
     """代码提交记录"""
     STATUS_CHOICES = [
-        ('pending', '等待评测'),
-        ('running', '评测中'),
-        ('success', '通过'),
-        ('failed', '未通过'),
-        ('error', '系统错误'),
+        ('pending', '待评分'),
+        ('graded', '已评分'),
     ]
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions', verbose_name="作业")
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions', verbose_name="提交学生")
     code = models.TextField(verbose_name="提交的代码")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="评测状态")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="评分状态")
     score = models.IntegerField(default=0, verbose_name="得分 (0-100)")
-    output = models.TextField(blank=True, verbose_name="运行输出")
+    output = models.TextField(blank=True, verbose_name="教师评语")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
