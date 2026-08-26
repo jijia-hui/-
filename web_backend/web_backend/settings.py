@@ -11,9 +11,28 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 从项目根目录 .env 加载配置（SMTP 邮箱等）；已存在的环境变量优先，不覆盖。
+# 邮件配置例外：EMAIL_HOST_USER 与 EMAIL_HOST_PASSWORD 必须成套存在才算有效，
+# 否则（如系统中只残留了半个变量）统一以 .env 为准，避免账号与授权码错配。
+_email_env_complete = (
+    'EMAIL_HOST_USER' in os.environ and 'EMAIL_HOST_PASSWORD' in os.environ
+)
+_env_file = BASE_DIR.parent / '.env'
+if _env_file.is_file():
+    for _line in _env_file.read_text(encoding='utf-8').splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith('#') and '=' in _line:
+            _key, _value = _line.split('=', 1)
+            _key = _key.strip()
+            _value = _value.strip().strip('"').strip("'")
+            if _key and (_key not in os.environ or
+                         (_key.startswith('EMAIL_') and not _email_env_complete)):
+                os.environ[_key] = _value
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend', # 可选保留
