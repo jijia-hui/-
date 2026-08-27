@@ -103,6 +103,9 @@ jobs:
 
       - name: 创建 kind 集群
         uses: helm/kind-action@v1
+        with:
+          # kind load 默认连接名为 kind 的集群，而 kind-action 默认集群名是 chart-testing
+          cluster_name: kind
 
       - uses: azure/setup-kubectl@v4
 
