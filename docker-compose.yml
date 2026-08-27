@@ -47,7 +47,6 @@ services:
       EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
     volumes:
       - media_data:/app/media
-      - static_data:/app/staticfiles
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 8000)); s.close()\""]
       interval: 5s
@@ -64,9 +63,6 @@ services:
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-8080}:80"
-    volumes:
-      - media_data:/usr/share/nginx/html/media
-      - static_data:/usr/share/nginx/html/static
     depends_on:
       backend:
         condition: service_healthy
@@ -74,4 +70,3 @@ services:
 volumes:
   mysql_data:
   media_data:
-  static_data:
