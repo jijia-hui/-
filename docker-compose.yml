@@ -1,0 +1,77 @@
+# 在线教学与实训平台 - Docker Compose 编排
+# 启动:docker compose up -d --build
+# 访问:http://localhost:${WEB_PORT:-8080}
+#
+# 可通过根目录 .env 覆盖以下变量:
+#   DB_PASSWORD / DB_ROOT_PASSWORD / DJANGO_SECRET_KEY / DJANGO_DEBUG /
+#   DJANGO_ALLOWED_HOSTS / WEB_PORT / EMAIL_HOST_USER / EMAIL_HOST_PASSWORD ...
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: otp-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: online_teach
+      MYSQL_USER: teach_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_pass_2026}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD:-root_pass_2026}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  backend:
+    build: ./web_backend
+    container_name: otp-backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: online_teach
+      DB_USER: teach_user
+      DB_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.qq.com}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
+    volumes:
+      - media_data:/app/media
+      - static_data:/app/staticfiles
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 8000)); s.close()\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build: ./web_frontend
+    container_name: otp-frontend
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    volumes:
+      - media_data:/usr/share/nginx/html/media
+      - static_data:/usr/share/nginx/html/static
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  media_data:
+  static_data:

@@ -1,0 +1,104 @@
+# 在线教学与实训平台 - CI 流水线
+# 触发：推送到 main 或 PR 到 main；也可手动运行（workflow_dispatch）
+# 内容：后端单元/集成/E2E 测试（MySQL 8 服务容器）、前端构建、Docker 镜像构建验证
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-test:
+    name: 后端测试（单元 + 集成 + E2E）
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root123
+          MYSQL_DATABASE: online_teach
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot123"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: online_teach
+      DB_USER: root
+      DB_PASSWORD: root123
+      DJANGO_SECRET_KEY: ci-secret-key
+      PYTHONPATH: web_backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装依赖
+        run: pip install -r web_backend/requirements.txt
+
+      - name: 单元测试 + 集成/API 测试（Django 测试运行器）
+        run: python web_backend/manage.py test 04_tests/unit 04_tests/integration
+
+      - name: 迁移数据库（E2E 需要真实库）
+        run: python web_backend/manage.py migrate
+
+      - name: 端到端测试（E2E-TC01~14）
+        run: python 04_tests/e2e/run_e2e.py
+
+      - name: 上传 E2E 报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: 04_tests/reports/e2e_report_*.md
+          if-no-files-found: ignore
+
+  frontend-build:
+    name: 前端构建
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web_frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web_frontend/package-lock.json
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建生产包
+        run: npm run build
+
+      - name: 代码规范检查（不阻断流水线，仅提示）
+        run: npm run lint
+        continue-on-error: true
+
+  docker-build:
+    name: Docker 镜像构建验证
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 构建后端镜像
+        run: docker build -t otp-backend:ci ./web_backend
+
+      - name: 构建前端镜像
+        run: docker build -t otp-frontend:ci ./web_frontend

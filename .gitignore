@@ -5,3 +5,6 @@ __pycache__/
 .env
 node_modules/
 dist/
+# CI/自动化生成的文件
+04_tests/reports/e2e_report_*.md
+web_backend/media/

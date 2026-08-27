@@ -41,12 +41,17 @@ AUTHENTICATION_BACKENDS = [
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$^=-b#t*n2($yi@im7fw$ug=9bse+4+#j+hw5w0#jhj=@msn$e'
+# 容器部署时通过环境变量 DJANGO_SECRET_KEY 注入（推荐）；未注入时沿用默认值（仅限开发）。
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or 'django-insecure-$^=-b#t*n2($yi@im7fw$ug=9bse+4+#j+hw5w0#jhj=@msn$e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+# 逗号分隔的主机列表；容器部署时通过环境变量 DJANGO_ALLOWED_HOSTS 注入
+ALLOWED_HOSTS = [
+    host.strip() for host in os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
+    if host.strip()
+]
 
 
 # Application definition
@@ -116,14 +121,15 @@ AUTH_USER_MODEL = 'apps.User'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# 数据库连接支持环境变量覆盖（容器部署由 docker-compose 注入），本地开发沿用默认值
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'online_teach',
-        'USER': 'root',
-        'PASSWORD': '147258369Ae!',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.environ.get('DB_NAME', 'online_teach'),
+        'USER': os.environ.get('DB_USER', 'root'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '147258369Ae!'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
     }
 }
 
@@ -163,7 +169,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-import os
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
