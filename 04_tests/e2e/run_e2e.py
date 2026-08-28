@@ -110,17 +110,41 @@ def ensure_admin():
     return username, password
 
 
+def latest_code(email):
+    """直接写入验证码，避免 E2E 走真实 SMTP 向 example.com 发信。"""
+    script = (
+        "from apps.models import EmailVerificationCode;"
+        f"print(EmailVerificationCode.issue('{email.lower()}').code)"
+    )
+    out = subprocess.run(
+        [sys.executable, 'manage.py', 'shell', '-c', script],
+        cwd=BACKEND_DIR, capture_output=True, text=True, timeout=60)
+    if out.returncode != 0:
+        print(f'[setup] 写入验证码失败: {out.stderr[:300]}')
+        return ''
+    lines = [ln.strip() for ln in (out.stdout or '').splitlines() if ln.strip()]
+    return lines[-1] if lines else ''
+
+
+def register_with_code(username, email, password='e2e1234', is_teacher=False, name=''):
+    code = latest_code(email)
+    payload = {'username': username, 'password': password, 'email': email,
+               'verification_code': code}
+    if is_teacher:
+        payload['is_teacher'] = True
+    return req('POST', '/api/users/', payload, expect=201, name=name)
+
+
 # ---------- 用例级端到端测试（E2E-TC01~14） ----------
 
 def tc01_registration():
     """E2E-TC01 用户注册（UC01）：学生/教师注册成功；缺邮箱被拒。"""
     name = f'e2e_stu_{SUFFIX}'
-    _, stu = req('POST', '/api/users/', {'username': name, 'password': 'e2e1234',
-                                         'email': f'{name}@example.com'},
-                 expect=201, name='E2E-TC01 学生注册')
-    _, tea = req('POST', '/api/users/', {'username': f'e2e_tea_{SUFFIX}', 'password': 'e2e1234',
-                                         'email': f'e2e_tea_{SUFFIX}@example.com', 'is_teacher': True},
-                 expect=201, name='E2E-TC01 教师注册')
+    email = f'{name}@example.com'
+    _, stu = register_with_code(name, email, name='E2E-TC01 学生注册')
+    tea_name = f'e2e_tea_{SUFFIX}'
+    _, tea = register_with_code(tea_name, f'{tea_name}@example.com', is_teacher=True,
+                                name='E2E-TC01 教师注册')
     req('POST', '/api/users/', {'username': f'e2e_nomail_{SUFFIX}', 'password': 'e2e1234'},
         expect=400, name='E2E-TC01-异常 缺邮箱注册被拒')
     return {'stu': stu, 'tea': tea}

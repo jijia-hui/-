@@ -6,6 +6,8 @@
 测试账号带 day1s_ 前缀，结束后自动删除，不污染开发数据。
 """
 import json
+import os
+import subprocess
 import time
 import urllib.error
 import urllib.request
@@ -13,6 +15,11 @@ import urllib.request
 BASE = 'http://127.0.0.1:8000'
 SUFFIX = str(int(time.time()))[-6:]
 results = []
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+BACKEND_DIR = os.path.join(REPO_ROOT, 'web_backend')
+PY = os.path.join(REPO_ROOT, '.venv', 'Scripts', 'python.exe')
+if not os.path.isfile(PY):
+    PY = 'python'
 
 
 def req(method, path, data=None, token=None, expect=None, name=''):
@@ -39,18 +46,33 @@ def req(method, path, data=None, token=None, expect=None, name=''):
     return code, j
 
 
+def latest_code(email):
+    script = (
+        "from apps.models import EmailVerificationCode;"
+        f"print(EmailVerificationCode.issue('{email.lower()}').code)"
+    )
+    out = subprocess.run(
+        [PY, 'manage.py', 'shell', '-c', script],
+        cwd=BACKEND_DIR, capture_output=True, text=True, timeout=60)
+    lines = [ln.strip() for ln in (out.stdout or '').splitlines() if ln.strip()]
+    return lines[-1] if lines else ''
+
+
+def register_user(username, email, is_teacher=False, name=''):
+    payload = {'username': username, 'password': 'smoke1234', 'email': email,
+               'verification_code': latest_code(email)}
+    if is_teacher:
+        payload['is_teacher'] = True
+    return req('POST', '/api/users/', payload, expect=201, name=name)
+
+
 # ---------- 用例 1：用户注册（学生 / 教师） ----------
 stu_name = f'day1s_stu_{SUFFIX}'
 tea_name = f'day1s_tea_{SUFFIX}'
 oth_name = f'day1s_oth_{SUFFIX}'
 
-code, stu = req('POST', '/api/users/', {
-    'username': stu_name, 'password': 'smoke1234', 'email': f'{stu_name}@example.com',
-}, expect=201, name='UC01 学生注册')
-code, tea = req('POST', '/api/users/', {
-    'username': tea_name, 'password': 'smoke1234', 'email': f'{tea_name}@example.com',
-    'is_teacher': True,
-}, expect=201, name='UC01 教师注册')
+code, stu = register_user(stu_name, f'{stu_name}@example.com', name='UC01 学生注册')
+code, tea = register_user(tea_name, f'{tea_name}@example.com', is_teacher=True, name='UC01 教师注册')
 
 # ---------- 用例 2：登录（获取 Token） ----------
 _, stu_login = req('POST', '/api/auth/token/', {
@@ -65,9 +87,7 @@ _, oth_login = req('POST', '/api/auth/token/', {
 stu_tok, tea_tok = stu_login['token'], tea_login['token']
 
 # 未选课学生：先注册
-_, oth = req('POST', '/api/users/', {
-    'username': oth_name, 'password': 'smoke1234', 'email': f'{oth_name}@example.com',
-}, expect=201, name='UC01 注册未选课学生')
+_, oth = register_user(oth_name, f'{oth_name}@example.com', name='UC01 注册未选课学生')
 _, oth_login = req('POST', '/api/auth/token/', {
     'username': oth_name, 'password': 'smoke1234',
 }, expect=200, name='UC02 未选课学生登录')

@@ -3,19 +3,35 @@ from django.shortcuts import render
 # Create your views here.
 import logging
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
-from django.http import HttpResponse
+from django.core.validators import validate_email
+from django.http import JsonResponse, HttpResponse
+from django.db import connection
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.utils import timezone
-from .models import User, Course, Assignment, Submission
+from .models import User, Course, Assignment, Submission, EmailVerificationCode
 from .serializers import UserSerializer, CourseSerializer, AssignmentSerializer, SubmissionSerializer
 from .permissions import IsCourseTeacherOrReadOnly
 
 logger = logging.getLogger(__name__)
+
+
+def health(request):
+    """容器 / K8s 探活用：确认进程可响应且数据库可连接。无需登录。"""
+    try:
+        connection.ensure_connection()
+        db_ok = True
+    except Exception:
+        db_ok = False
+    payload = {'status': 'ok' if db_ok else 'degraded', 'db': db_ok}
+    return JsonResponse(payload, status=200 if db_ok else 503)
+
 
 # 简单的测试视图
 def hello(request):
@@ -31,32 +47,6 @@ class UserViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
-    def perform_create(self, serializer):
-        user = serializer.save()
-        self._send_registration_email(user)
-
-    def _send_registration_email(self, user):
-        """注册成功后向用户邮箱发送欢迎邮件（发送失败不影响注册结果）"""
-        if not user.email:
-            return
-        try:
-            subject = '注册成功 - 在线教学平台'
-            message = (
-                f'你好，{user.username}！\n\n'
-                '恭喜你成功注册在线教学平台。\n'
-                '请使用注册时的用户名和密码登录系统，开始使用课程与作业功能。\n\n'
-                '此邮件由系统自动发送，请勿回复。'
-            )
-            html_message = (
-                f'<p>你好，<strong>{user.username}</strong>！</p>'
-                '<p>恭喜你成功注册<strong>在线教学平台</strong>。</p>'
-                '<p>请使用注册时的用户名和密码登录系统，开始使用课程与作业功能。</p>'
-                '<p style="color:#999;font-size:12px">此邮件由系统自动发送，请勿回复。</p>'
-            )
-            send_mail(subject, message, None, [user.email], html_message=html_message)
-        except Exception as e:
-            logger.warning('发送注册邮件失败 %s <%s>: %s', user.username, user.email, e)
-
     def get_queryset(self):
         # 普通用户只能看自己，教师和管理员可看所有
         if self.request.user.is_teacher or self.request.user.is_staff:
@@ -67,6 +57,52 @@ class UserViewSet(viewsets.ModelViewSet):
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
+
+
+class SendVerificationCodeView(APIView):
+    """向邮箱发送 6 位注册验证码。匿名可访问。"""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = EmailVerificationCode.normalize_email(request.data.get('email'))
+        if not email:
+            return Response({'email': ['请输入邮箱']}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_email(email)
+        except DjangoValidationError:
+            return Response({'email': ['请输入有效的邮箱地址']}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(email__iexact=email).exists():
+            return Response({'email': ['该邮箱已被注册']}, status=status.HTTP_400_BAD_REQUEST)
+
+        wait = EmailVerificationCode.seconds_until_resend(email)
+        if wait > 0:
+            return Response(
+                {'detail': f'发送过于频繁，请 {wait} 秒后再试', 'retry_after': wait},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        rec = EmailVerificationCode.issue(email)
+        try:
+            subject = '注册验证码 - 在线教学平台'
+            message = (
+                f'你的注册验证码是：{rec.code}\n\n'
+                '验证码 10 分钟内有效，请勿泄露给他人。\n'
+                '如非本人操作，请忽略本邮件。\n'
+            )
+            html_message = (
+                f'<p>你的注册验证码是：</p>'
+                f'<p style="font-size:28px;letter-spacing:6px;font-weight:700">{rec.code}</p>'
+                '<p>验证码 <strong>10 分钟</strong>内有效，请勿泄露给他人。</p>'
+                '<p style="color:#999;font-size:12px">如非本人操作，请忽略本邮件。</p>'
+            )
+            send_mail(subject, message, None, [email], html_message=html_message)
+        except Exception as e:
+            logger.warning('发送注册验证码失败 <%s>: %s', email, e)
+            rec.delete()
+            return Response({'detail': '验证码发送失败，请稍后重试'}, status=status.HTTP_502_BAD_GATEWAY)
+        return Response({'detail': '验证码已发送，请查收邮箱', 'ttl_seconds': 600})
+
 
 class CourseViewSet(viewsets.ModelViewSet):
     # 空的 queryset 满足 DRF router 要求，实际查询由 get_queryset 动态决定

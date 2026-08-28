@@ -1,6 +1,6 @@
 # Register your models here.
 from django.contrib import admin
-from .models import User, Course, Assignment, Submission
+from .models import User, Course, Assignment, Submission, EmailVerificationCode
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -25,3 +25,10 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('id', 'assignment', 'student', 'status', 'score', 'created_at')
     list_filter = ('status', 'assignment')
     search_fields = ('student__username',)
+
+
+@admin.register(EmailVerificationCode)
+class EmailVerificationCodeAdmin(admin.ModelAdmin):
+    list_display = ('email', 'code', 'created_at', 'used_at')
+    list_filter = ('used_at',)
+    search_fields = ('email',)

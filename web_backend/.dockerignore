@@ -6,3 +6,6 @@ media/
 staticfiles/
 .env
 *.log
+db.sqlite3
+.git
+*.md

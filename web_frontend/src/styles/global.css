@@ -388,6 +388,14 @@ body {
   font-size: 15px;
   border-radius: 10px;
 }
+.auth-card .code-compact {
+  width: 100%;
+}
+.auth-card .code-compact .ant-btn {
+  height: 44px;
+  flex: 0 0 auto;
+  padding: 0 14px;
+}
 
 /* ---------- 课程卡片 ---------- */
 .course-card {

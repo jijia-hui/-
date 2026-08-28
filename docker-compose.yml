@@ -1,16 +1,16 @@
 # 在线教学与实训平台 - Docker Compose 编排
-# 启动:docker compose up -d --build
-# 访问:http://localhost:${WEB_PORT:-8080}
+# 启动: docker compose up -d --build
+# 访问: http://localhost:${WEB_PORT:-8080}
+# 演示数据: docker compose exec backend python manage.py seed_data
 #
-# 可通过根目录 .env 覆盖以下变量:
-#   DB_PASSWORD / DB_ROOT_PASSWORD / DJANGO_SECRET_KEY / DJANGO_DEBUG /
-#   DJANGO_ALLOWED_HOSTS / WEB_PORT / EMAIL_HOST_USER / EMAIL_HOST_PASSWORD ...
+# 可通过根目录 .env 覆盖变量（不要把 USE_SQLITE=1 写进容器环境）
 services:
   mysql:
     image: mysql:8.0
     container_name: otp-mysql
     restart: unless-stopped
     environment:
+      TZ: ${TZ:-Asia/Shanghai}
       MYSQL_DATABASE: online_teach
       MYSQL_USER: teach_user
       MYSQL_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
@@ -18,20 +18,25 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+      - --skip-name-resolve
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD:-root_pass_2026}"]
+      # $$ 让容器用自己的 MYSQL_ROOT_PASSWORD，避免和宿主机 .env 插值不一致
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 5s
       retries: 20
-      start_period: 30s
+      start_period: 45s
 
   backend:
     build: ./web_backend
     container_name: otp-backend
     restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
     environment:
+      TZ: ${TZ:-Asia/Shanghai}
       DB_HOST: mysql
       DB_PORT: "3306"
       DB_NAME: online_teach
@@ -40,19 +45,28 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-2}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
       EMAIL_HOST: ${EMAIL_HOST:-smtp.qq.com}
       EMAIL_PORT: ${EMAIL_PORT:-465}
       EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-False}
     volumes:
       - media_data:/app/media
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 8000)); s.close()\""]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)",
+        ]
       interval: 5s
       timeout: 5s
       retries: 20
-      start_period: 30s
+      start_period: 40s
     depends_on:
       mysql:
         condition: service_healthy
@@ -61,8 +75,16 @@ services:
     build: ./web_frontend
     container_name: otp-frontend
     restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
     ports:
       - "${WEB_PORT:-8080}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     depends_on:
       backend:
         condition: service_healthy

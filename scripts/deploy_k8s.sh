@@ -34,7 +34,7 @@ sed "s|__IMAGE_TAG__|$TAG|g" "$K8S_DIR/frontend.yaml" | kubectl apply -f -
 kubectl -n "$NS" rollout status deploy/backend --timeout=300s
 kubectl -n "$NS" rollout status deploy/frontend --timeout=300s
 
-echo "==> 4/5 健康检查（前端首页 + 后端 API）"
+echo "==> 4/5 健康检查（前端首页 + 后端 /api/health/）"
 kubectl -n "$NS" get pods
 kubectl -n "$NS" port-forward svc/frontend 8080:80 --address 127.0.0.1 >/dev/null 2>&1 &
 PF_PID=$!
@@ -49,12 +49,17 @@ for ((i = 1; i <= 30; i++)); do
     fi
     sleep 2
 done
-CODE=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/users/me/ || true)
-if [ "$CODE" != "401" ] && [ "$CODE" != "403" ]; then
-    echo "错误: 后端 API 健康检查失败（期望 401/403，实际 HTTP $CODE）"
+HEALTH=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/health/ || true)
+if [ "$HEALTH" != "200" ]; then
+    echo "错误: 后端健康检查失败（期望 /api/health/ HTTP 200，实际 $HEALTH）"
     exit 1
 fi
-echo "==> 健康检查通过: 前端首页 200，后端 API $CODE（未认证，符合预期）"
+CODE=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/users/me/ || true)
+if [ "$CODE" != "401" ] && [ "$CODE" != "403" ]; then
+    echo "错误: 后端 API 鉴权检查失败（期望 401/403，实际 HTTP $CODE）"
+    exit 1
+fi
+echo "==> 健康检查通过: 前端首页 200，/api/health/ 200，/api/users/me/ $CODE"
 
 echo "==> 5/5 部署完成"
 echo "    本机访问: kubectl -n $NS port-forward svc/frontend 8080:80"

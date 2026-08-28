@@ -53,6 +53,17 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# 经 Nginx 反代访问 Django Admin / 登录页时需要可信来源
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.environ.get(
+        'DJANGO_CSRF_TRUSTED_ORIGINS',
+        'http://localhost:8080,http://127.0.0.1:8080',
+    ).split(',')
+    if origin.strip()
+]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 
 # Application definition
 
@@ -122,16 +133,29 @@ AUTH_USER_MODEL = 'apps.User'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 # 数据库连接支持环境变量覆盖（容器部署由 docker-compose 注入），本地开发沿用默认值
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME', 'online_teach'),
-        'USER': os.environ.get('DB_USER', 'root'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', '147258369Ae!'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
+# USE_SQLITE=1 时使用本地文件库，便于在本机 MySQL 密码未知时验证功能
+if os.environ.get('USE_SQLITE', '') == '1':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': str(BASE_DIR / 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('DB_NAME', 'online_teach'),
+            'USER': os.environ.get('DB_USER', 'root'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', '147258369Ae!'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '3306'),
+            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '60')),
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+            },
+        }
+    }
 
 
 # Password validation
@@ -156,9 +180,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = os.environ.get('TZ', 'Asia/Shanghai')
 
 USE_I18N = True
 
@@ -168,15 +192,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# 邮件发送配置（注册成功通知）
-# 设置 EMAIL_HOST_USER / EMAIL_HOST_PASSWORD（QQ邮箱为授权码）后自动使用真实 SMTP 发送；
-# 未配置时退回控制台后端，邮件内容直接打印到终端，便于开发调试。
+# 邮件发送配置（注册验证码）
+# 设置 EMAIL_HOST_USER / EMAIL_HOST_PASSWORD（QQ/126 邮箱为授权码）后自动使用真实 SMTP 发送；
+# 未配置时退回控制台后端，验证码内容直接打印到终端，便于开发调试。
 EMAIL_BACKEND = (
     'django.core.mail.backends.smtp.EmailBackend'
     if os.environ.get('EMAIL_HOST_USER')

@@ -8,7 +8,7 @@ from datetime import timedelta
 from django.test import SimpleTestCase, TestCase
 from django.utils import timezone
 
-from apps.models import Assignment, Course, Submission, User
+from apps.models import Assignment, Course, Submission, User, EmailVerificationCode
 from apps.serializers import (
     AssignmentSerializer,
     CourseSerializer,
@@ -21,7 +21,9 @@ class UserSerializerTest(TestCase):
     """UNIT-TC01：注册序列化器——邮箱必填/格式、密码 write_only 且哈希存储"""
 
     def test_create_hashes_password(self):
-        data = {'username': 'stu', 'password': 'pass1234', 'email': 'stu@example.com'}
+        code = EmailVerificationCode.issue('stu@example.com').code
+        data = {'username': 'stu', 'password': 'pass1234', 'email': 'stu@example.com',
+                'verification_code': code}
         user = UserSerializer(data=data)
         self.assertTrue(user.is_valid(), user.errors)
         saved = user.save()
@@ -48,6 +50,12 @@ class UserSerializerTest(TestCase):
         serializer = UserSerializer(data={'username': 'stu', 'email': 'a@b.com'})
         self.assertFalse(serializer.is_valid())
         self.assertIn('password', serializer.errors)
+
+    def test_verification_code_required_on_create(self):
+        serializer = UserSerializer(data={
+            'username': 'stu', 'password': 'pass1234', 'email': 'stu@example.com'})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('verification_code', serializer.errors)
 
 
 class CourseSerializerTest(TestCase):

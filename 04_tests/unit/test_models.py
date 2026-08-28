@@ -9,7 +9,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.models import Assignment, Course, Submission, User
+from apps.models import Assignment, Course, EmailVerificationCode, Submission, User
 
 
 class UserModelTest(TestCase):
@@ -142,3 +142,22 @@ class SubmissionModelTest(TestCase):
         s.refresh_from_db()
         self.assertEqual(s.status, 'graded')
         self.assertEqual(s.score, 92)
+
+
+class EmailVerificationCodeModelTest(TestCase):
+    """UNIT-TC01：邮箱验证码有效期与一次性使用"""
+
+    def test_issue_six_digits(self):
+        rec = EmailVerificationCode.issue('a@example.com')
+        self.assertEqual(len(rec.code), 6)
+        self.assertTrue(rec.code.isdigit())
+        self.assertFalse(rec.is_expired())
+
+    def test_consume_success_then_reject_reuse(self):
+        rec = EmailVerificationCode.issue('a@example.com')
+        self.assertTrue(EmailVerificationCode.consume('a@example.com', rec.code))
+        self.assertFalse(EmailVerificationCode.consume('a@example.com', rec.code))
+
+    def test_normalize_email(self):
+        rec = EmailVerificationCode.issue('  Foo@Example.COM ')
+        self.assertEqual(rec.email, 'foo@example.com')

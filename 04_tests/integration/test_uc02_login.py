@@ -57,3 +57,13 @@ class LoginRejectionTest(TestCase):
         # DRF 3.12+ 对未认证请求返回 403（PermissionDenied 语义），认证缺失即拒绝
         res = APIClient().get('/api/users/me/')
         self.assertEqual(res.status_code, 403)
+
+
+class HealthCheckTest(TestCase):
+    """容器探活接口：未登录可访问，数据库正常时返回 200"""
+
+    def test_health_ok_without_auth(self):
+        res = APIClient().get('/api/health/')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()['status'], 'ok')
+        self.assertTrue(res.json()['db'])

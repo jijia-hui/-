@@ -1,20 +1,23 @@
 # 在线教学与实训平台 - 后端镜像
-# 基于 Python 3.12（与本地开发环境 .venv 一致），使用 gunicorn 提供服务
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    TZ=Asia/Shanghai
 
 WORKDIR /app
 
-# 先装依赖，利用 Docker 层缓存
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-
-RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint.sh \
+    && mkdir -p /app/media /app/staticfiles
 
 EXPOSE 8000
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=40s --retries=5 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)"
 
 ENTRYPOINT ["./entrypoint.sh"]
