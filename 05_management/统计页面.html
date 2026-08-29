@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>杨任宇班-17组 · 项目看板 v2</title>
+  <style>
+    :root {
+      --bg: #eef1f6;
+      --card: #fff;
+      --ink: #1c2333;
+      --muted: #5c6578;
+      --line: #dfe3ee;
+      --backlog: #1f9d57;
+      --ready: #2f6fed;
+      --doing: #d48806;
+      --review: #722ed1;
+      --done: #cf4d2f;
+      --p0: #cf1322;
+      --p1: #d48806;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      padding: 20px 24px 40px;
+      line-height: 1.45;
+    }
+    .top {
+      background: #1c2333;
+      color: #fff;
+      border-radius: 12px;
+      padding: 22px 26px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .top h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.2px; }
+    .top .sub { font-size: 13px; color: #c5ccd8; margin-top: 6px; }
+    .stamp {
+      background: #2a3346;
+      border: 1px solid #3d4860;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      text-align: right;
+    }
+    .stamp strong { font-size: 16px; }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .kpi {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .kpi .lbl { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .kpi .num { font-size: 28px; font-weight: 700; margin-top: 4px; }
+    .kpi .hint { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .ok { color: #1f9d57; }
+    .warn { color: #d48806; }
+    .filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+    .filters span { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 16px;
+      padding: 4px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .chip.on { background: #1c2333; color: #fff; border-color: #1c2333; }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+      align-items: start;
+    }
+    .col {
+      background: #f7f8fb;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      min-height: 280px;
+      overflow: hidden;
+    }
+    .col-h {
+      padding: 10px 12px 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    .col-h .row { display: flex; justify-content: space-between; align-items: baseline; }
+    .col-h h2 { font-size: 14px; font-weight: 700; }
+    .col-h .wip { font-size: 11px; color: var(--muted); }
+    .col-h .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .col.backlog .col-h { border-top: 3px solid var(--backlog); }
+    .col.ready .col-h { border-top: 3px solid var(--ready); }
+    .col.doing .col-h { border-top: 3px solid var(--doing); }
+    .col.review .col-h { border-top: 3px solid var(--review); }
+    .col.done .col-h { border-top: 3px solid var(--done); }
+    .col-body { padding: 10px; }
+    .item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 11px;
+      margin-bottom: 8px;
+    }
+    .item:last-child { margin-bottom: 0; }
+    .item .head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .tid {
+      font-size: 11px;
+      font-weight: 700;
+      color: #2f6fed;
+      font-family: ui-monospace, Consolas, monospace;
+    }
+    .gh { font-size: 11px; color: var(--muted); }
+    .pri {
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-left: auto;
+    }
+    .pri.p0 { background: #fff1f0; color: var(--p0); }
+    .pri.p1 { background: #fff7e6; color: var(--p1); }
+    .item .name { font-size: 13px; font-weight: 600; }
+    .tags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #eef0f6;
+      color: #4b5568;
+    }
+    .tag.doc { background: #f3e8ff; color: #6b21a8; }
+    .tag.test { background: #e6f4ff; color: #0958d9; }
+    .tag.eng { background: #e8f8ef; color: #137333; }
+    .tag.feat { background: #fff3e8; color: #ad4e00; }
+    .tag.mgmt { background: #f0f0f0; color: #434343; }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 7px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .who {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .av {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #2f6fed;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .av.g { background: #722ed1; }
+    .av.l { background: #1f9d57; }
+    .bar { height: 4px; background: #eceff5; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .bar i { display: block; height: 100%; background: #d48806; }
+    .grid2 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 14px; margin-bottom: 18px; }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .panel h3 { font-size: 14px; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 7px 8px; text-align: left; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; font-size: 11px; }
+    .scores { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .sc {
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 6px;
+      background: #fafbfe;
+    }
+    .sc .k { font-size: 11px; color: var(--muted); }
+    .sc .v { font-size: 18px; font-weight: 700; margin: 3px 0; }
+    .sc .s { font-size: 11px; }
+    .tl { position: relative; padding-left: 18px; }
+    .tl::before {
+      content: "";
+      position: absolute; left: 5px; top: 4px; bottom: 4px; width: 2px;
+      background: var(--line);
+    }
+    .tl-i { position: relative; margin-bottom: 10px; font-size: 13px; }
+    .tl-i::before {
+      content: "";
+      position: absolute; left: -16px; top: 5px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #c5ccd8;
+    }
+    .tl-i.d::before { background: #1f9d57; }
+    .tl-i.c::before { background: #d48806; }
+    .tl-i .dte { font-weight: 700; margin-right: 6px; }
+    .guide { font-size: 13px; }
+    .guide ol { padding-left: 18px; }
+    .guide li { margin: 6px 0; }
+    .guide code { background: #f0f2f7; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+    .foot {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+    .pbar { height: 8px; background: #eceff5; border-radius: 4px; overflow: hidden; margin: 6px 0 10px; }
+    .pbar i { display: block; height: 100%; }
+    .pbar .g { background: #1f9d57; }
+    .pbar .o { background: #d48806; }
+    .pl { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+    @media (max-width: 1200px) {
+      .kpis, .board, .scores { grid-template-columns: 1fr 1fr; }
+      .grid2 { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .filters { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top">
+  <div>
+    <h1>在线教学平台 · 项目看板 v2</h1>
+    <div class="sub">杨任宇班-17组 · 软件工程基础实践 2026 夏 · 对齐 GitHub Projects 五列 · 卡片含编号 / 优先级 / 负责人 / 截止日期 / 标签</div>
+  </div>
+  <div class="stamp">
+    <div><strong>2026-08-28</strong></div>
+    <div>第 4 天 / 共 10 天 · 距中期检查 1 天</div>
+    <div>分支 check8.27</div>
+  </div>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><div class="lbl">任务完成</div><div class="num">16/26</div><div class="hint">已完成 / 全部任务</div></div>
+  <div class="kpi"><div class="lbl">用例实现</div><div class="num ok">14/14</div><div class="hint">UC01~UC14 可运行</div></div>
+  <div class="kpi"><div class="lbl">自动化测试</div><div class="num ok">179</div><div class="hint">单元 39 + 集成 93 + E2E 47</div></div>
+  <div class="kpi"><div class="lbl">进行中 WIP</div><div class="num warn">2/3</div><div class="hint">组件级 + 对象级顺序图</div></div>
+  <div class="kpi"><div class="lbl">前 5 天进度</div><div class="num">~78%</div><div class="hint">缺组件/对象级图</div></div>
+</div>
+
+<div class="filters">
+  <span>视图</span>
+  <button class="chip on" data-f="all" type="button">全部</button>
+  <button class="chip" data-f="mid" type="button">中期检查</button>
+  <button class="chip" data-f="today" type="button">今日焦点</button>
+</div>
+
+<div class="board" id="board">
+  <section class="col backlog">
+    <div class="col-h">
+      <div class="row"><h2>积压</h2><span class="wip">7 / 上限 12</span></div>
+      <div class="desc">尚未开始，中期后再取</div>
+    </div>
+    <div class="col-body">
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-M-02</span><span class="pri p0">P0</span></div><div class="name">微服务自动构建与 K8s 部署</div><div class="tags"><span class="tag eng">工程</span><span class="tag">M</span></div><div class="meta"><span class="who"><span class="av g">全</span>全组</span><span>截止 9/1</span></div></article>
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-M-03</span><span class="pri p0">P0</span></div><div class="name">用例回归测试（微服务版）</div><div class="tags"><span class="tag test">测试</span><span class="tag">M</span></div><div class="meta"><span class="who"><span class="av">员</span>组员</span><span>截止 9/2</span></div></article>
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-M-04</span><span class="pri p1">P1</span></div><div class="name">自动扩缩容实验（HPA）</div><div class="tags"><span class="tag eng">工程</span><span class="tag">M</span></div><div class="meta"><span class="who"><span class="av">员</span>组员</span><span>截止 9/2</span></div></article>
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-M-05</span><span class="pri p1">P1</span></div><div class="name">故障处理实验</div><div class="tags"><span class="tag eng">工程</span><span class="tag">M</span></div><div class="meta"><span class="who"><span class="av">员</span>组员</span><span>截止 9/2</span></div></article>
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-M-06</span><span class="pri p0">P0</span></div><div class="name">性能对比：单体 vs 微服务</div><div class="tags"><span class="tag test">测试</span><span class="tag">M</span></div><div class="meta"><span class="who"><span class="av g">全</span>全组</span><span>截止 9/3</span></div></article>
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-P-02</span><span class="pri p0">P0</span></div><div class="name">答辩 PPT 与技术总结</div><div class="tags"><span class="tag mgmt">管理</span><span class="tag">P</span></div><div class="meta"><span class="who"><span class="av g">全</span>全组</span><span>截止 9/4</span></div></article>
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-P-03</span><span class="pri p1">P1</span></div><div class="name">个人权重表</div><div class="tags"><span class="tag mgmt">管理</span><span class="tag">P</span></div><div class="meta"><span class="who"><span class="av l">长</span>组长</span><span>截止 9/4</span></div></article>
+    </div>
+  </section>
+
+  <section class="col ready">
+    <div class="col-h">
+      <div class="row"><h2>准备好了</h2><span class="wip">1</span></div>
+      <div class="desc">明天中期检查取走</div>
+    </div>
+    <div class="col-body">
+      <article class="item" data-f="mid">
+        <div class="head"><span class="tid">T-M-01</span><span class="pri p0">P0</span></div>
+        <div class="name">微服务划分与接口清单</div>
+        <div class="tags"><span class="tag doc">文档</span><span class="tag">M</span><span class="tag">中期必交</span></div>
+        <div class="meta"><span class="who"><span class="av g">全</span>全组</span><span>截止 8/29</span></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="col doing">
+    <div class="col-h">
+      <div class="row"><h2>进行中</h2><span class="wip">2 / 上限 3</span></div>
+      <div class="desc">今日焦点 · 中期检查缺口</div>
+    </div>
+    <div class="col-body">
+      <article class="item" data-f="today mid">
+        <div class="head"><span class="tid">T-D2-02-C</span><span class="pri p0">P0</span></div>
+        <div class="name">组件级顺序图 COMP-SEQ01~14</div>
+        <div class="tags"><span class="tag doc">文档</span><span class="tag">D2</span></div>
+        <div class="meta"><span class="who"><span class="av">员</span>组员</span><span>截止 8/29</span></div>
+        <div class="bar" title="0/14"><i style="width:0%"></i></div>
+      </article>
+      <article class="item" data-f="today mid">
+        <div class="head"><span class="tid">T-D2-02-O</span><span class="pri p0">P0</span></div>
+        <div class="name">对象级顺序图 OBJ-SEQ01~14</div>
+        <div class="tags"><span class="tag doc">文档</span><span class="tag">D2</span></div>
+        <div class="meta"><span class="who"><span class="av">员</span>组员</span><span>截止 8/29</span></div>
+        <div class="bar" title="0/14"><i style="width:0%"></i></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="col review">
+    <div class="col-h">
+      <div class="row"><h2>回顾</h2><span class="wip">1 / 上限 5</span></div>
+      <div class="desc">已提交，待教师确认</div>
+    </div>
+    <div class="col-body">
+      <article class="item" data-f="all">
+        <div class="head"><span class="tid">T-D1-03</span><span class="gh">#3</span><span class="pri p1">P1</span></div>
+        <div class="name">用例清单 v1.1 待教师最终确认</div>
+        <div class="tags"><span class="tag doc">文档</span><span class="tag">不阻塞</span></div>
+        <div class="meta"><span class="who"><span class="av l">长</span>组长</span><span>已提交</span></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="col done">
+    <div class="col-h">
+      <div class="row"><h2>完成</h2><span class="wip">16</span></div>
+      <div class="desc">含 Docker / CI / 验证码 / 179 项测试</div>
+    </div>
+    <div class="col-body">
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-D1-01~08</span><span class="gh">#1 #2 #3 #5 #6</span></div><div class="name">第 1 天全部任务</div><div class="tags"><span class="tag mgmt">管理</span><span class="tag">D1</span></div><div class="meta"><span class="who"><span class="av g">全</span>全组</span><span>8/25</span></div></article>
+      <article class="item" data-f="mid"><div class="head"><span class="tid">T-D2-01</span></div><div class="name">需求文档定稿 v1.1</div><div class="tags"><span class="tag doc">文档</span></div><div class="meta"><span class="who"><span class="av l">长</span>组长</span><span>8/26</span></div></article>
+      <article class="item" data-f="mid"><div class="head"><span class="tid">T-D2-02-S</span></div><div class="name">系统级顺序图 SYS-SEQ01~14</div><div class="tags"><span class="tag doc">文档</span></div><div class="meta"><span class="who"><span class="av">员</span>组员</span><span>8/26</span></div></article>
+      <article class="item" data-f="mid"><div class="head"><span class="tid">T-D2-03</span></div><div class="name">追溯表 v1.2</div><div class="tags"><span class="tag doc">文档</span></div><div class="meta"><span class="who"><span class="av l">长</span>组长</span><span>8/26</span></div></article>
+      <article class="item" data-f="mid"><div class="head"><span class="tid">T-D2-04</span><span class="gh">#7 #8 #9</span><span class="pri p0">P0</span></div><div class="name">三类测试 179 项全通过</div><div class="tags"><span class="tag test">测试</span></div><div class="meta"><span class="who"><span class="av">员</span>组员</span><span>8/26</span></div></article>
+      <article class="item" data-f="mid"><div class="head"><span class="tid">T-D2-05</span><span class="pri p0">P0</span></div><div class="name">Docker 化与 CI/CD</div><div class="tags"><span class="tag eng">工程</span></div><div class="meta"><span class="who"><span class="av">崔</span>崔子健</span><span>8/28 · check8.27</span></div></article>
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-D2-06</span></div><div class="name">注册改为邮箱验证码</div><div class="tags"><span class="tag feat">功能</span></div><div class="meta"><span class="who"><span class="av">崔</span>崔子健</span><span>8/27</span></div></article>
+      <article class="item" data-f="all"><div class="head"><span class="tid">T-P-01</span></div><div class="name">用户手册与测试文档</div><div class="tags"><span class="tag doc">文档</span></div><div class="meta"><span class="who"><span class="av">员</span>组员</span><span>8/26</span></div></article>
+      <article class="item" data-f="today"><div class="head"><span class="tid">T-P-04</span></div><div class="name">看板重新设计（五列+字段）</div><div class="tags"><span class="tag mgmt">管理</span></div><div class="meta"><span class="who"><span class="av">崔</span>崔子健</span><span>8/28</span></div></article>
+    </div>
+  </section>
+</div>
+
+<div class="panel" style="margin-bottom:18px;">
+  <h3>小组评分项进度（项目 90 分）</h3>
+  <div class="scores">
+    <div class="sc"><div class="k">文档 10</div><div class="v warn">~6</div><div class="s">系统级完成，组件/对象级未出</div></div>
+    <div class="sc"><div class="k">测试 10</div><div class="v ok">10</div><div class="s">179 项全通过</div></div>
+    <div class="sc"><div class="k">容器化 8</div><div class="v ok">~7</div><div class="s">Compose / 探活 / 入口脚本已合入</div></div>
+    <div class="sc"><div class="k">CI/CD 10</div><div class="v ok">~7</div><div class="s">workflow 在 check8.27</div></div>
+    <div class="sc"><div class="k">中期 2</div><div class="v warn">—</div><div class="s">8/29</div></div>
+    <div class="sc"><div class="k">微服务 7+5</div><div class="v">0</div><div class="s">明天做划分 T-M-01</div></div>
+    <div class="sc"><div class="k">微服务 CI 5</div><div class="v">0</div><div class="s">8/31 起</div></div>
+    <div class="sc"><div class="k">云原生 5</div><div class="v">0</div><div class="s">9/2–9/3</div></div>
+    <div class="sc"><div class="k">性能 4</div><div class="v">0</div><div class="s">9/3</div></div>
+    <div class="sc"><div class="k">项目管理 4</div><div class="v warn">~3</div><div class="s">站会 + 看板 v2</div></div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="panel">
+    <h3>第一阶段进度（前 5 天）</h3>
+    <div class="pl"><span>用例清单 + 代码实现 UC01~14</span><span>100%</span></div>
+    <div class="pbar"><i class="g" style="width:100%"></i></div>
+    <div class="pl"><span>系统级顺序图 SYS-SEQ01~14</span><span>100%</span></div>
+    <div class="pbar"><i class="g" style="width:100%"></i></div>
+    <div class="pl"><span>组件级顺序图 COMP-SEQ01~14</span><span>0%</span></div>
+    <div class="pbar"><i class="o" style="width:0%"></i></div>
+    <div class="pl"><span>对象级顺序图 OBJ-SEQ01~14</span><span>0%</span></div>
+    <div class="pbar"><i class="o" style="width:0%"></i></div>
+    <div class="pl"><span>三类自动化测试</span><span>100%</span></div>
+    <div class="pbar"><i class="g" style="width:100%"></i></div>
+    <div class="pl"><span>Docker 容器化 + CI/CD</span><span>100%（代码已合入）</span></div>
+    <div class="pbar"><i class="g" style="width:100%"></i></div>
+  </div>
+  <div class="panel">
+    <h3>里程碑</h3>
+    <div class="tl">
+      <div class="tl-i d"><span class="dte">8/25</span>原系统 + 用例清单 + 基线标签</div>
+      <div class="tl-i d"><span class="dte">8/26</span>系统级图 + 追溯表 + 179 项测试</div>
+      <div class="tl-i d"><span class="dte">8/27–28</span>Docker + CI + 验证码 + 看板 v2</div>
+      <div class="tl-i c"><span class="dte">8/29</span>中期检查：补三层图 + 微服务划分</div>
+      <div class="tl-i"><span class="dte">8/31–9/3</span>微服务 / K8s / 实验 / 性能</div>
+      <div class="tl-i"><span class="dte">9/4</span>答辩</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="panel">
+    <h3>把组长 GitHub 看板改成这个样子</h3>
+    <div class="guide">
+      <ol>
+        <li>列已经对了，<strong>不要改列名</strong>：积压 → 准备好了 → 进行中 → 回顾 → 完成。进行中 WIP 上限保持 3。</li>
+        <li>Project 设置里加自定义字段：<code>任务编号</code>（文本）、<code>优先级</code>（P0/P1/P2）、<code>计划完成</code>（日期）、<code>验收条件</code>（文本）。</li>
+        <li>仓库 Labels：阶段 <code>D1</code> <code>D2</code> <code>M</code> <code>P</code>；类型 <code>功能</code> <code>测试</code> <code>文档</code> <code>工程</code> <code>管理</code>；优先级 <code>P0</code> <code>P1</code>。</li>
+        <li>Issue 标题一律改成 <code>[T-D2-05] Docker 化与 CI/CD</code>，并指定 Assignees。</li>
+        <li>把 #7 #8 #9 拖到<strong>完成</strong>（已是 T-D2-04，179 项已通过）。缺的卡片按任务清单新建。</li>
+        <li>进行中只放 <code>T-D2-02-C</code> 和 <code>T-D2-02-O</code>；准备好了只放 <code>T-M-01</code>。</li>
+      </ol>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>现有 Issue 对照</h3>
+    <table>
+      <thead><tr><th>GitHub</th><th>规范标题</th><th>应在列</th></tr></thead>
+      <tbody>
+        <tr><td>#1</td><td>[T-D1-01] 启动原系统</td><td>完成</td></tr>
+        <tr><td>#2</td><td>[T-D1-02] 逐项检查业务场景</td><td>完成</td></tr>
+        <tr><td>#3</td><td>[T-D1-03] 列出用例清单</td><td>完成（副本可留回顾）</td></tr>
+        <tr><td>#5</td><td>[T-D1-06] 打 Git 基线</td><td>完成</td></tr>
+        <tr><td>#6</td><td>[T-D1-07] 站会简报与看板</td><td>完成</td></tr>
+        <tr><td>#7 #8 #9</td><td>[T-D2-04] 三类测试 179 项</td><td>完成（勿留积压）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid2" style="margin-top:14px;">
+  <div class="panel">
+    <h3>用例实现状态</h3>
+    <table>
+      <thead><tr><th>范围</th><th>代码</th><th>测试</th><th>系统级图</th><th>组件/对象级</th></tr></thead>
+      <tbody>
+        <tr><td>UC01 注册（含验证码）</td><td>完成</td><td>完成</td><td>完成</td><td>未开始</td></tr>
+        <tr><td>UC02 登录</td><td>完成</td><td>完成</td><td>完成</td><td>未开始</td></tr>
+        <tr><td>UC03~UC14</td><td>完成</td><td>完成</td><td>完成</td><td>未开始</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h3>测试摘要（2026-08-26 基线）</h3>
+    <table>
+      <thead><tr><th>层级</th><th>总数</th><th>通过</th><th>失败</th></tr></thead>
+      <tbody>
+        <tr><td>单元</td><td>39</td><td>39</td><td>0</td></tr>
+        <tr><td>集成 / API</td><td>93</td><td>93</td><td>0</td></tr>
+        <tr><td>端到端</td><td>47</td><td>47</td><td>0</td></tr>
+        <tr><td><strong>合计</strong></td><td><strong>179</strong></td><td><strong>179</strong></td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:8px;font-size:12px;color:var(--muted)">报告：04_tests/reports/测试报告.md · 验证码相关用例已在后续提交中补测</div>
+  </div>
+</div>
+
+<div class="foot">
+  杨任宇班-17组 · 看板 v2 · 2026-08-28 · 数据源 看板任务清单.md<br>
+  截图：全屏打开本页 → Win+Shift+S → 看板区存为 看板截图/看板_20260828.png ，指标区存为 统计_20260828.png
+</div>
+
+<script>
+  const chips = document.querySelectorAll(".chip");
+  const items = document.querySelectorAll(".item");
+  chips.forEach((c) => {
+    c.addEventListener("click", () => {
+      chips.forEach((x) => x.classList.remove("on"));
+      c.classList.add("on");
+      const f = c.dataset.f;
+      items.forEach((el) => {
+        const flags = (el.dataset.f || "all").split(/\s+/);
+        el.style.display = (f === "all" || flags.includes(f) || flags.includes("all") && f === "all") ? "" : (flags.includes(f) ? "" : "none");
+        if (f === "all") el.style.display = "";
+        else el.style.display = flags.includes(f) ? "" : "none";
+      });
+    });
+  });
+</script>
+</body>
+</html>
