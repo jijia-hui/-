@@ -9,3 +9,6 @@ dist/
 04_tests/reports/e2e_report_*.md
 web_backend/media/
 web_backend/db.sqlite3
+
+# ZCode 本地会话目录
+.zcode/

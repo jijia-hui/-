@@ -13,7 +13,41 @@
 | 编排 | Docker Compose / Kubernetes | `docker-compose.yml` / `k8s/` |
 | CI/CD | GitHub Actions | `.github/workflows/` |
 
-## 快速启动（Docker Compose）
+## 快速启动（拉取 GHCR 镜像，无需克隆源码）
+
+CI 在每次推送到 `main` 后自动构建前后端镜像并发布到 GHCR。本地只需一个编排文件即可拉起完整项目（自动建库、执行迁移、收集静态文件），无需克隆源码、无需安装 Python/Node/MySQL。
+
+前置条件：安装 [Docker Desktop](https://www.docker.com/products/docker-desktop/)（含 Docker Engine 与 Compose v2）。
+
+```bash
+# 1. 下载编排文件（Windows PowerShell 可用：
+#    Invoke-WebRequest -OutFile docker-compose.prod.yml <下方地址>）
+curl -LO https://raw.githubusercontent.com/jijia-hui/-/main/docker-compose.prod.yml
+
+# 2. 拉取镜像并启动（MySQL 初始化约需半分钟，可用 ps 等待 healthy）
+docker compose -f docker-compose.prod.yml up -d
+
+# 3.（可选）导入演示数据（脚本幂等，详见下方"测试数据"）
+docker compose -f docker-compose.prod.yml exec backend python manage.py seed_data
+```
+
+启动完成后访问 http://localhost:8080（端口可通过 `.env` 中的 `WEB_PORT` 修改，`.env` 需与编排文件放同一目录）。
+
+> **镜像拉取报 `denied`？** GHCR 包默认私有，两种解决方式任选其一：
+> 1.（推荐）在 GitHub 仓库右侧 **Packages** 中分别打开 `online-teaching-platform-backend` 和 `online-teaching-platform-frontend` → **Package settings** → **Danger Zone** → **Change visibility** → **Public**，一次设置永久生效；
+> 2. 本机登录：`docker login ghcr.io -u jijia-hui`，密码使用勾选了 `read:packages` 权限的 [Personal Access Token](https://github.com/settings/tokens)。
+
+已克隆仓库的情况下，在仓库根目录执行 `docker compose -f docker-compose.prod.yml up -d` 同样可直接拉镜像启动，跳过本地构建。
+
+### 常用命令（拉取模式）
+
+```bash
+docker compose -f docker-compose.prod.yml ps                # 查看服务状态
+docker compose -f docker-compose.prod.yml logs -f backend   # 跟踪后端日志
+docker compose -f docker-compose.prod.yml down              # 停止（数据保留在卷中）
+```
+
+## 从源码构建启动（Docker Compose）
 
 前置条件：安装 [Docker Desktop](https://www.docker.com/products/docker-desktop/)（含 Docker Engine 与 Compose v2）。
 
@@ -72,11 +106,14 @@ docker compose exec backend python manage.py createsuperuser   # 后台管理员
 
 推送到 `main`：CI 自动执行单元/集成/E2E 测试与前后端构建；CD 测试通过后制作**版本化镜像**（提交 SHA 或 `v*` 标签）推送 GHCR，并部署到 Kubernetes（kind）完成健康检查。任一环节失败即停止，后续部署不执行；运行日志与失败诊断均保留为构建产物。详见 `部署文档.md`。
 
+镜像发布到 GHCR 后，任何一台装有 Docker 的机器都可通过 `docker-compose.prod.yml` 一键拉取运行完整项目，见上文"快速启动"。
+
 ## 目录结构
 
 ```text
 online_teaching_platform/
-├── docker-compose.yml        # 容器编排（mysql / backend / frontend）
+├── docker-compose.yml        # 容器编排（mysql / backend / frontend，源码构建）
+├── docker-compose.prod.yml   # 拉取式编排：直接使用 GHCR 镜像，无需源码
 ├── web_backend/              # Django 后端（Dockerfile、entrypoint.sh）
 ├── web_frontend/             # React 前端（Dockerfile、nginx.conf）
 ├── k8s/                      # Kubernetes 部署清单

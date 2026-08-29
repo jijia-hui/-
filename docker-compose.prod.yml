@@ -1,0 +1,102 @@
+# 在线教学与实训平台 - 拉取式部署编排（无需源码构建）
+# 与 docker-compose.yml 的区别：backend/frontend 直接使用 CI 发布到 GHCR 的镜像，
+# 本地只装 Docker 即可运行完整项目，无需克隆源码、无需安装 Python/Node/MySQL。
+#
+# 用法（仅下载本文件即可，无需克隆仓库）:
+#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml exec backend python manage.py seed_data
+#   访问: http://localhost:${WEB_PORT:-8080}
+#
+# 镜像来源: ghcr.io/jijia-hui/online-teaching-platform-{backend,frontend}
+# 若拉取报 denied，请在 GitHub 仓库 Packages 页面将两个包设为 Public，
+# 或先执行 docker login ghcr.io（PAT 需勾选 read:packages）。
+#
+# 可通过同目录 .env 覆盖变量（不要把 USE_SQLITE=1 写进容器环境）
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: otp-mysql
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      MYSQL_DATABASE: online_teach
+      MYSQL_USER: teach_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_pass_2026}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-name-resolve
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      # $$ 让容器用自己的 MYSQL_ROOT_PASSWORD，避免和宿主机 .env 插值不一致
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+
+  backend:
+    image: ghcr.io/jijia-hui/online-teaching-platform-backend:latest
+    container_name: otp-backend
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: online_teach
+      DB_USER: teach_user
+      DB_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-2}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.qq.com}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-False}
+    volumes:
+      - media_data:/app/media
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    image: ghcr.io/jijia-hui/online-teaching-platform-frontend:latest
+    container_name: otp-frontend
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  media_data:
