@@ -199,11 +199,11 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # 邮件发送配置（注册验证码）
-# 设置 EMAIL_HOST_USER / EMAIL_HOST_PASSWORD（QQ/126 邮箱为授权码）后自动使用真实 SMTP 发送；
-# 未配置时退回控制台后端，验证码内容直接打印到终端，便于开发调试。
+# EMAIL_HOST_USER / EMAIL_HOST_PASSWORD（QQ/126 邮箱为授权码）成套配置时使用真实 SMTP 发送；
+# 任一缺失（如只设了邮箱没设授权码）都退回控制台后端，验证码直接打印到日志，避免注册不可用。
 EMAIL_BACKEND = (
     'django.core.mail.backends.smtp.EmailBackend'
-    if os.environ.get('EMAIL_HOST_USER')
+    if os.environ.get('EMAIL_HOST_USER') and os.environ.get('EMAIL_HOST_PASSWORD')
     else 'django.core.mail.backends.console.EmailBackend'
 )
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.qq.com')
