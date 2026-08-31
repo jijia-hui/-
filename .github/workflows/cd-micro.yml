@@ -184,6 +184,19 @@ jobs:
             frontend=${{ env.VERSION }} | tee deploy_micro_k8s.log
         shell: bash
 
+      - name: 建立本机访问通道（后台 port-forward，供后续 E2E 步骤使用）
+        run: |
+          # 部署脚本退出时会清理自己的 port-forward，这里为 E2E 单独建立作业级后台通道
+          nohup kubectl -n online-teach-micro port-forward svc/frontend 8080:80 --address 127.0.0.1 >/tmp/pf-frontend.log 2>&1 &
+          nohup kubectl -n online-teach-micro port-forward svc/backend 8000:8000 --address 127.0.0.1 >/tmp/pf-backend.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS -o /dev/null http://127.0.0.1:8080/ && break
+            sleep 2
+          done
+          curl -fsS -o /dev/null http://127.0.0.1:8080/ || { echo "port-forward 未就绪"; cat /tmp/pf-frontend.log; exit 1; }
+          echo "port-forward 就绪: http://127.0.0.1:8080 (frontend) / :8000 (gateway)"
+        shell: bash
+
       - name: 端到端回归（E2E-TC01~14 + 级联清理，经网关）
         run: |
           pip install requests
