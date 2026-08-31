@@ -1,33 +1,22 @@
-# 后端（Django + gunicorn）+ 媒体文件持久化卷 + 服务
-# 镜像版本号由部署脚本替换 __IMAGE_TAG__（禁止使用 latest）
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: media-pvc
-  namespace: online-teach
-spec:
-  accessModes: [ReadWriteOnce]
-  resources:
-    requests:
-      storage: 1Gi
----
+# 用户服务（与 backend 同一镜像，SERVICE_ROLE=user）
+# 镜像版本号由部署脚本替换 __IMAGE_TAG__
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: user-service
   namespace: online-teach
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: user-service
   template:
     metadata:
       labels:
-        app: backend
+        app: user-service
     spec:
       containers:
-        - name: backend
+        - name: user-service
           image: ghcr.io/jijia-hui/online-teaching-platform-backend:__IMAGE_TAG__
           imagePullPolicy: IfNotPresent
           ports:
@@ -60,10 +49,7 @@ spec:
             - name: GUNICORN_WORKERS
               value: "2"
             - name: SERVICE_ROLE
-              value: "app"
-          volumeMounts:
-            - name: media
-              mountPath: /app/media
+              value: "user"
           readinessProbe:
             httpGet:
               path: /api/health/
@@ -76,19 +62,15 @@ spec:
               port: 8000
             initialDelaySeconds: 30
             periodSeconds: 15
-      volumes:
-        - name: media
-          persistentVolumeClaim:
-            claimName: media-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend
+  name: user-service
   namespace: online-teach
 spec:
   selector:
-    app: backend
+    app: user-service
   ports:
     - port: 8000
       targetPort: 8000

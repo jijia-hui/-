@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 import logging
+import os
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
@@ -102,6 +103,27 @@ class SendVerificationCodeView(APIView):
             rec.delete()
             return Response({'detail': '验证码发送失败，请稍后重试'}, status=status.HTTP_502_BAD_GATEWAY)
         return Response({'detail': '验证码已发送，请查收邮箱', 'ttl_seconds': 600})
+
+
+class InternalUserView(APIView):
+    """供课程/作业服务按 ID 查用户。不经 Nginx 对外暴露，仅集群内访问。"""
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk):
+        expected = os.environ.get('INTERNAL_TOKEN', '')
+        if expected:
+            got = request.headers.get('X-Internal-Token', '')
+            if got != expected:
+                return Response({'detail': 'forbidden'}, status=status.HTTP_403_FORBIDDEN)
+        user = get_object_or_404(User, pk=pk)
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'is_teacher': user.is_teacher,
+            'is_staff': user.is_staff,
+        })
 
 
 class CourseViewSet(viewsets.ModelViewSet):
