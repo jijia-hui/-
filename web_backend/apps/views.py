@@ -105,17 +105,24 @@ class SendVerificationCodeView(APIView):
         return Response({'detail': '验证码已发送，请查收邮箱', 'ttl_seconds': 600})
 
 
+def _reject_if_bad_internal_token(request):
+    expected = os.environ.get('INTERNAL_TOKEN', '')
+    if not expected:
+        return None
+    if request.headers.get('X-Internal-Token', '') != expected:
+        return Response({'detail': 'forbidden'}, status=status.HTTP_403_FORBIDDEN)
+    return None
+
+
 class InternalUserView(APIView):
     """供课程/作业服务按 ID 查用户。不经 Nginx 对外暴露，仅集群内访问。"""
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, pk):
-        expected = os.environ.get('INTERNAL_TOKEN', '')
-        if expected:
-            got = request.headers.get('X-Internal-Token', '')
-            if got != expected:
-                return Response({'detail': 'forbidden'}, status=status.HTTP_403_FORBIDDEN)
+        denied = _reject_if_bad_internal_token(request)
+        if denied:
+            return denied
         user = get_object_or_404(User, pk=pk)
         return Response({
             'id': user.id,
@@ -167,6 +174,41 @@ class CourseViewSet(viewsets.ModelViewSet):
         course = self.get_object()
         course.students.remove(request.user)
         return Response({'status': 'unenrolled'})
+
+
+class InternalCourseEnrollmentView(APIView):
+    """作业服务提交前校验：该用户是否已选此课。"""
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk, user_id):
+        denied = _reject_if_bad_internal_token(request)
+        if denied:
+            return denied
+        course = get_object_or_404(Course, pk=pk)
+        return Response({
+            'course_id': course.id,
+            'user_id': int(user_id),
+            'enrolled': course.students.filter(id=user_id).exists(),
+        })
+
+
+class InternalCourseTeacherView(APIView):
+    """作业服务评分前校验授课教师。"""
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk):
+        denied = _reject_if_bad_internal_token(request)
+        if denied:
+            return denied
+        course = get_object_or_404(Course, pk=pk)
+        return Response({
+            'course_id': course.id,
+            'teacher_id': course.teacher_id,
+            'username': course.teacher.username,
+        })
+
 
 class AssignmentViewSet(viewsets.ModelViewSet):
     queryset = Assignment.objects.all()

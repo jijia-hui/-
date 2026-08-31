@@ -3,7 +3,7 @@
 # 访问: http://localhost:${WEB_PORT:-8080}
 # 演示数据: docker compose exec backend python manage.py seed_data
 #
-# 第一刀：user-service 独立进程（注册/登录）；backend 仍承担课程/作业。
+# 第二刀：course-service 独立进程（课程/选课）；backend 仍承担作业/提交。
 # 可通过根目录 .env 覆盖变量（不要把 USE_SQLITE=1 写进容器环境）
 services:
   mysql:
@@ -115,6 +115,42 @@ services:
       mysql:
         condition: service_healthy
 
+  course-service:
+    build: ./web_backend
+    container_name: otp-course-service
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: online_teach
+      DB_USER: teach_user
+      DB_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-2}
+      SERVICE_ROLE: course
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   frontend:
     build: ./web_frontend
     container_name: otp-frontend
@@ -133,6 +169,8 @@ services:
       backend:
         condition: service_healthy
       user-service:
+        condition: service_healthy
+      course-service:
         condition: service_healthy
 
 volumes:

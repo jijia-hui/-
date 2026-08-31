@@ -2,9 +2,10 @@
 URL configuration for web_backend project.
 
 SERVICE_ROLE 环境变量：
-  all  （默认）本地单进程 / 自动化测试，注册+课程全部挂在本进程
-  user 仅用户服务：注册、验证码、Token、/api/users/、Admin、内部查用户
-  app  剩余单体：课程 / 作业 / 提交 / 媒体文件
+  all    （默认）本地单进程 / 自动化测试，全部接口挂在本进程
+  user   用户服务：注册、验证码、Token、/api/users/、Admin、内部查用户
+  course 课程服务：课程 CRUD、选课/退课、内部选课/教师校验
+  app    剩余单体：作业 / 提交 / 媒体文件
 """
 import os
 
@@ -14,13 +15,13 @@ from rest_framework.authtoken.views import obtain_auth_token
 from django.conf import settings
 from django.views.static import serve as static_serve
 
-from apps.urls import user_urlpatterns, app_urlpatterns
+from apps.urls import user_urlpatterns, course_urlpatterns, app_urlpatterns
 from apps.views import health
 
 
 def normalize_role(role=None):
     value = (role if role is not None else os.environ.get('SERVICE_ROLE', 'all')).strip().lower()
-    if value not in ('all', 'user', 'app'):
+    if value not in ('all', 'user', 'course', 'app'):
         return 'all'
     return value
 
@@ -36,6 +37,8 @@ def build_urlpatterns(role=None):
             path('admin/', admin.site.urls),
         ]
         urlpatterns += user_urlpatterns()
+    if role in ('all', 'course'):
+        urlpatterns += course_urlpatterns()
     if role in ('all', 'app'):
         urlpatterns += app_urlpatterns()
         urlpatterns += [

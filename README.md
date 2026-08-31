@@ -29,7 +29,7 @@ docker compose up -d --build
 ```
 
 启动完成后访问 http://localhost:8080 （端口可通过 `.env` 中的 `WEB_PORT` 修改）。
-Compose 会启动 MySQL、**user-service**（注册/登录）、**backend**（课程/作业）和前端。
+Compose 会启动 MySQL、**user-service**（注册/登录）、**course-service**（课程/选课）、**backend**（作业/提交）和前端。
 
 ### 测试数据
 

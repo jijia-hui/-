@@ -130,7 +130,7 @@ REST_FRAMEWORK = {
 # 自定义用户模型
 AUTH_USER_MODEL = 'apps.User'
 
-# 进程角色（第一刀微服务）：all=单进程；user=用户服务；app=课程/作业剩余单体
+# 进程角色：all=单进程；user=用户服务；course=课程服务；app=作业/提交剩余单体
 # 由 docker-compose / K8s 注入；本地 python manage.py runserver 不设则走 all。
 SERVICE_ROLE = os.environ.get('SERVICE_ROLE', 'all')
 # Database

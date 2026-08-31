@@ -2,13 +2,15 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     UserViewSet, CourseViewSet, AssignmentViewSet, SubmissionViewSet,
-    SendVerificationCodeView, InternalUserView, health,
+    SendVerificationCodeView, InternalUserView,
+    InternalCourseEnrollmentView, InternalCourseTeacherView, health,
 )
 
 # 对外路由由 web_backend.urls 按 SERVICE_ROLE 组装：
-#   user = 注册/登录/用户/Admin
-#   app  = 课程/作业/提交（当前剩余单体）
-#   all  = 本地 runserver / 单测，一个进程提供全部接口
+#   user   = 注册/登录/用户/Admin
+#   course = 课程 CRUD / 选课退课
+#   app    = 作业/提交/评分（剩余单体）
+#   all    = 本地 runserver / 单测，一个进程提供全部接口
 
 
 def user_urlpatterns():
@@ -21,9 +23,26 @@ def user_urlpatterns():
     ]
 
 
-def app_urlpatterns():
+def course_urlpatterns():
     router = DefaultRouter()
     router.register(r'courses', CourseViewSet)
+    return [
+        path('api/', include(router.urls)),
+        path(
+            'internal/courses/<int:pk>/enrollment/<int:user_id>/',
+            InternalCourseEnrollmentView.as_view(),
+            name='internal_course_enrollment',
+        ),
+        path(
+            'internal/courses/<int:pk>/teacher/',
+            InternalCourseTeacherView.as_view(),
+            name='internal_course_teacher',
+        ),
+    ]
+
+
+def app_urlpatterns():
+    router = DefaultRouter()
     router.register(r'assignments', AssignmentViewSet)
     router.register(r'submissions', SubmissionViewSet)
     return [
@@ -34,5 +53,6 @@ def app_urlpatterns():
 urlpatterns = [
     path('api/health/', health, name='health'),
     *user_urlpatterns(),
+    *course_urlpatterns(),
     *app_urlpatterns(),
 ]
