@@ -9,6 +9,10 @@ dist/
 04_tests/reports/e2e_report_*.md
 web_backend/media/
 web_backend/db.sqlite3
+# 微服务版本地运行/测试残留
+services/*/db.sqlite3
+services/*/staticfiles/
+services/*/media/
 
 # ZCode 本地会话目录
 .zcode/

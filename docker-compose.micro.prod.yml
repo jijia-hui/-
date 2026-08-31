@@ -1,0 +1,184 @@
+# 在线教学与实训平台 - 微服务版拉取式部署（无需源码构建）
+# backend 网关与三个业务微服务直接使用 CI 发布到 GHCR 的镜像：
+#   ghcr.io/jijia-hui/otp-{user,course,assignment}-service、otp-gateway
+# 用法（仅下载本文件即可，无需克隆仓库）:
+#   docker compose -f docker-compose.micro.prod.yml up -d
+#   访问: http://localhost:${WEB_PORT:-8080}
+# 若拉取报 denied，请在 GitHub Packages 页面把上述包设为 Public，
+# 或先 docker login ghcr.io（PAT 需勾选 read:packages）。
+#
+# 镜像版本由 CI 注入（提交 SHA / v* 标签），默认 latest；不要只依赖 latest：
+#   MICRO_IMAGE_TAG=v1.1.0 docker compose -f docker-compose.micro.prod.yml up -d
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: otp-micro-mysql
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      MYSQL_DATABASE: otp_user
+      MYSQL_USER: teach_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_pass_2026}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-name-resolve
+    volumes:
+      - mysql_micro_data:/var/lib/mysql
+      - ./services/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+
+  user-service:
+    image: ghcr.io/jijia-hui/otp-user-service:${MICRO_IMAGE_TAG:-latest}
+    container_name: otp-micro-user
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    environment: &svc-env
+      TZ: ${TZ:-Asia/Shanghai}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: otp_user
+      DB_USER: teach_user
+      DB_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-1}
+      SERVICE_NAME: user-service
+      APP_VERSION: ${MICRO_IMAGE_TAG:-latest}
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-me-please-override-in-prod-0123456789abcdef}
+      JWT_EXPIRE_HOURS: ${JWT_EXPIRE_HOURS:-24}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-key}
+      COURSE_SERVICE_URL: http://course-service:8000
+      ASSIGNMENT_SERVICE_URL: http://assignment-service:8000
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.qq.com}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-False}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  course-service:
+    image: ghcr.io/jijia-hui/otp-course-service:${MICRO_IMAGE_TAG:-latest}
+    container_name: otp-micro-course
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    environment:
+      <<: *svc-env
+      DB_NAME: otp_course
+      SERVICE_NAME: course-service
+      USER_SERVICE_URL: http://user-service:8000
+      ASSIGNMENT_SERVICE_URL: http://assignment-service:8000
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  assignment-service:
+    image: ghcr.io/jijia-hui/otp-assignment-service:${MICRO_IMAGE_TAG:-latest}
+    container_name: otp-micro-assignment
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    environment:
+      <<: *svc-env
+      DB_NAME: otp_assignment
+      SERVICE_NAME: assignment-service
+      USER_SERVICE_URL: http://user-service:8000
+      COURSE_SERVICE_URL: http://course-service:8000
+    volumes:
+      - media_micro_data:/app/media
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  backend:
+    image: ghcr.io/jijia-hui/otp-gateway:${MICRO_IMAGE_TAG:-latest}
+    container_name: otp-micro-gateway
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${GATEWAY_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8000/api/health/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      user-service:
+        condition: service_healthy
+      course-service:
+        condition: service_healthy
+      assignment-service:
+        condition: service_healthy
+
+  frontend:
+    image: ghcr.io/jijia-hui/online-teaching-platform-frontend:${MICRO_IMAGE_TAG:-latest}
+    container_name: otp-micro-frontend
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mysql_micro_data:
+  media_micro_data:

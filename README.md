@@ -3,15 +3,67 @@
 课程教学场景的在线教学与实训平台：学生选课、查看作业、在线提交代码，教师创建课程/作业、查看提交并评分。
 后端 Django + DRF，前端 React + Vite + Ant Design，数据库 MySQL 8，全部组件运行在容器中。
 
+> **架构说明**：自 2026-08-31 起后端拆分为 **3 个业务微服务 + 1 个 Nginx API 网关**（用户服务 / 课程服务 / 作业与提交服务），
+> 对外 API 与页面完全兼容；单体版保留在 `web_backend/`（Git 标签 `monolith-start`），供性能对比实验使用。
+> 拆分方案见《微服务划分图.md》《数据表归属方案.md》《微服务接口清单.md》《跨服务调用说明.md》。
+
 ## 技术栈
 
 | 组件 | 技术 | 目录 |
 |---|---|---|
-| 后端 | Python 3.12 / Django 6 / DRF / gunicorn | `web_backend/` |
+| 后端（微服务版，当前） | Python 3.12 / Django 6 / DRF / JWT / gunicorn ×3 服务 + Nginx 网关 | `services/` |
+| 后端（单体版，性能对比基线） | Python 3.12 / Django 6 / DRF / gunicorn | `web_backend/` |
 | 前端 | Node 20 / React 18 / Vite / Ant Design | `web_frontend/` |
-| 数据库 | MySQL 8.0（官方镜像） | 容器内服务 |
-| 编排 | Docker Compose / Kubernetes | `docker-compose.yml` / `k8s/` |
+| 数据库 | MySQL 8.0（官方镜像，微服务版三库隔离） | 容器内服务 |
+| 编排 | Docker Compose / Kubernetes | `docker-compose*.yml` / `k8s/`（单体）、`k8s/micro/`（微服务） |
 | CI/CD | GitHub Actions | `.github/workflows/` |
+
+## 微服务版快速启动（Docker Compose，源码构建）
+
+```bash
+git clone https://github.com/jijia-hui/-.git online_teaching_platform
+cd online_teaching_platform
+docker compose -f docker-compose.micro.yml up -d --build
+```
+
+- 首次启动自动创建 MySQL 三个库（`otp_user` / `otp_course` / `otp_assignment`）、各服务自动迁移。
+- 访问 http://localhost:8080；网关直连调试 http://localhost:8000（`GATEWAY_PORT` 可改）。
+- 健康检查：`/api/health/`（网关）、`/api/health/{user,course,assignment}/`（逐服务，含版本号与 DB 状态）。
+- 演示数据（按顺序执行三条命令）：
+
+```bash
+docker compose -f docker-compose.micro.yml exec user-service       python manage.py seed_data
+docker compose -f docker-compose.micro.yml exec course-service     python manage.py seed_data
+docker compose -f docker-compose.micro.yml exec assignment-service python manage.py seed_data
+```
+
+- 测试账号：教师 `demo_teacher`、学生 `demo_student`，密码均为 `Demo@1234`；三门示例课程各含 2 个作业。
+- 拉取 GHCR 镜像免构建运行：`docker compose -f docker-compose.micro.prod.yml up -d`（可用 `MICRO_IMAGE_TAG` 指定版本）。
+- 与单体版互不冲突（容器名 `otp-micro-*`、独立卷），两套可同时运行做性能对比。
+
+### 微服务版测试
+
+```bash
+# 各服务单元 + API 测试（SQLite，无需数据库；96 项）
+USE_SQLITE=1 python services/user_service/manage.py test tests
+USE_SQLITE=1 python services/course_service/manage.py test tests
+USE_SQLITE=1 python services/assignment_service/manage.py test tests
+
+# 端到端回归（需微服务栈已启动；58 项断言覆盖 UC01~UC14 + 级联删除）
+E2E_BASE_URL=http://127.0.0.1:8080 E2E_EXEC_PREFIX="docker exec -i otp-micro-user" \
+python 04_tests/e2e/run_e2e_micro.py
+```
+
+### 微服务版 Kubernetes
+
+```bash
+bash scripts/deploy_micro_k8s.sh user=<tag> course=<tag> assignment=<tag> frontend=<tag>
+# 例（CI 中统一以当前版本部署）：
+bash scripts/deploy_micro_k8s.sh user=v1.1.0 course=v1.1.0 assignment=v1.1.0 frontend=v1.1.0
+kubectl -n online-teach-micro port-forward svc/frontend 8080:80   # 本机访问
+```
+
+命名空间 `online-teach-micro`（与单体版 `online-teach` 隔离）；每服务有 `/api/live/`、`/api/ready/` 探针与版本号注入。
 
 ## 快速启动（拉取 GHCR 镜像，无需克隆源码）
 
@@ -104,21 +156,31 @@ docker compose exec backend python manage.py createsuperuser   # 后台管理员
 
 ## CI/CD（GitHub Actions）
 
-推送到 `main`：CI 自动执行单元/集成/E2E 测试与前后端构建；CD 测试通过后制作**版本化镜像**（提交 SHA 或 `v*` 标签）推送 GHCR，并部署到 Kubernetes（kind）完成健康检查。任一环节失败即停止，后续部署不执行；运行日志与失败诊断均保留为构建产物。详见 `部署文档.md`。
+**单体版**（`ci.yml` / `cd.yml`）：推送到 `main` 后自动执行单元/集成/E2E 测试与前后端构建；CD 测试通过后制作**版本化镜像**（提交 SHA 或 `v*` 标签）推送 GHCR，并部署到 Kubernetes（kind）完成健康检查。任一环节失败即停止。
 
-镜像发布到 GHCR 后，任何一台装有 Docker 的机器都可通过 `docker-compose.prod.yml` 一键拉取运行完整项目，见上文"快速启动"。
+**微服务版**（`ci-micro.yml` / `cd-micro.yml`）：按**路径检测变更**，只有发生变更的微服务才会重新测试、构建镜像并推送（`ghcr.io/<owner>/otp-{user,course,assignment}-service`、`otp-gateway`，版本号 = 提交 SHA / `v*` 标签）；随后部署整套微服务到 kind 集群（`k8s/micro/`），健康检查 + **UC01~UC14 全量 E2E 回归**通过才算成功，部署日志与 E2E 报告保留为构建产物（含失败诊断：pod 状态、deployment 详情、各服务日志）。
+
+镜像发布到 GHCR 后，任何一台装有 Docker 的机器都可通过 `docker-compose.micro.prod.yml` 一键拉取运行微服务版，见上文"微服务版快速启动"。
 
 ## 目录结构
 
 ```text
 online_teaching_platform/
-├── docker-compose.yml        # 容器编排（mysql / backend / frontend，源码构建）
-├── docker-compose.prod.yml   # 拉取式编排：直接使用 GHCR 镜像，无需源码
-├── web_backend/              # Django 后端（Dockerfile、entrypoint.sh）
-├── web_frontend/             # React 前端（Dockerfile、nginx.conf）
-├── k8s/                      # Kubernetes 部署清单
-├── scripts/deploy_k8s.sh     # K8s 部署 + 健康检查脚本
-├── .github/workflows/        # CI / CD 流水线
-├── 04_tests/                 # 单元 / 集成 / 端到端测试
-└── 部署文档.md               # 完整部署与 CI/CD 说明
+├── docker-compose.yml            # 单体版编排（mysql / backend / frontend，源码构建）
+├── docker-compose.prod.yml       # 单体版拉取式编排（GHCR 镜像）
+├── docker-compose.micro.yml      # 微服务版编排（源码构建：三服务 + 网关 + 前端）
+├── docker-compose.micro.prod.yml # 微服务版拉取式编排（GHCR 镜像）
+├── services/                     # 微服务版后端
+│   ├── user_service/             #   用户服务（users / email_verification_codes）
+│   ├── course_service/           #   课程服务（courses / enrollments）
+│   ├── assignment_service/       #   作业与提交服务（assignments / submissions）
+│   ├── gateway/                  #   API 网关（Nginx，编排内服务名 backend:8000）
+│   └── db/init/                  #   MySQL 三库初始化脚本
+├── web_backend/                  # 单体版后端（monolith-start，性能对比基线）
+├── web_frontend/                 # React 前端（单体/微服务共用镜像）
+├── k8s/                          # 单体版 K8s 清单；k8s/micro/ 为微服务版
+├── scripts/                      # 部署脚本（deploy_k8s.sh / deploy_micro_k8s.sh）
+├── .github/workflows/            # CI / CD（单体 + 微服务各一套）
+├── 04_tests/                     # 单元 / 集成 / 端到端测试（含微服务版）
+└── 部署文档.md                    # 完整部署与 CI/CD 说明
 ```

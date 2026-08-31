@@ -1,0 +1,99 @@
+# 业务微服务 1：用户服务（注册/JWT 登录/用户管理/Django Admin）
+# 镜像版本号由部署脚本替换 __TAG__（禁止使用 latest）
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: online-teach-micro
+  labels:
+    app: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: ghcr.io/jijia-hui/otp-user-service:__TAG__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env: &svc-env
+            - name: DB_HOST
+              value: mysql
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: otp_user
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: db-user}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: db-password}
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: django-secret-key}
+            - name: DJANGO_DEBUG
+              value: "False"
+            - name: DJANGO_ALLOWED_HOSTS
+              value: "*"
+            - name: DJANGO_CSRF_TRUSTED_ORIGINS
+              value: "http://localhost:8080,http://127.0.0.1:8080,http://localhost:30080,http://127.0.0.1:30080"
+            - name: GUNICORN_WORKERS
+              value: "2"
+            - name: SERVICE_NAME
+              value: user-service
+            - name: APP_VERSION
+              value: "__TAG__"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: jwt-secret}
+            - name: JWT_EXPIRE_HOURS
+              value: "24"
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: internal-api-key}
+            - name: COURSE_SERVICE_URL
+              value: http://course-service:8000
+            - name: ASSIGNMENT_SERVICE_URL
+              value: http://assignment-service:8000
+            - name: TZ
+              value: Asia/Shanghai
+          # 资源请求/限制（为后续 HPA 自动扩缩容实验预留指标口径）
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /api/ready/
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/live/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: online-teach-micro
+spec:
+  selector:
+    app: user-service
+  ports:
+    - port: 8000
+      targetPort: 8000

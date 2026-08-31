@@ -1,0 +1,5 @@
+# 微服务版独立命名空间（与单体版 online-teach 隔离，两套可并行部署做性能对比）
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: online-teach-micro

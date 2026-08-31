@@ -1,0 +1,190 @@
+# 在线教学与实训平台 - 微服务版编排（源码构建）
+# 后端拆为 3 个业务微服务 + 1 个 Nginx API 网关（编排内服务名 backend，端口 8000，前端零改动）
+# 启动: docker compose -f docker-compose.micro.yml up -d --build
+# 访问: http://localhost:${WEB_PORT:-8080}
+# 演示数据（按顺序执行三个服务）:
+#   docker compose -f docker-compose.micro.yml exec user-service python manage.py seed_data
+#   docker compose -f docker-compose.micro.yml exec course-service python manage.py seed_data
+#   docker compose -f docker-compose.micro.yml exec assignment-service python manage.py seed_data
+#
+# 与单体版 docker-compose.yml 互不冲突（容器名 otp-micro-*、卷名独立），可并行运行做性能对比。
+# 可通过根目录 .env 覆盖变量（不要把 USE_SQLITE=1 写进容器环境）
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: otp-micro-mysql
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      MYSQL_DATABASE: otp_user   # 镜像机制要求；三个库由 initdb 脚本统一创建
+      MYSQL_USER: teach_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_pass_2026}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-name-resolve
+    volumes:
+      - mysql_micro_data:/var/lib/mysql
+      - ./services/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # $$ 让容器用自己的 MYSQL_ROOT_PASSWORD，避免和宿主机 .env 插值不一致
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+
+  # ---------- 业务微服务 1：用户服务 ----------
+  user-service:
+    build: ./services/user_service
+    container_name: otp-micro-user
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    environment: &svc-env
+      TZ: ${TZ:-Asia/Shanghai}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: otp_user
+      DB_USER: teach_user
+      DB_PASSWORD: ${DB_PASSWORD:-teach_pass_2026}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-1}
+      SERVICE_NAME: user-service
+      APP_VERSION: ${APP_VERSION:-dev-compose}
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-me-please-override-in-prod-0123456789abcdef}
+      JWT_EXPIRE_HOURS: ${JWT_EXPIRE_HOURS:-24}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-key}
+      COURSE_SERVICE_URL: http://course-service:8000
+      ASSIGNMENT_SERVICE_URL: http://assignment-service:8000
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.qq.com}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-False}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ---------- 业务微服务 2：课程服务 ----------
+  course-service:
+    build: ./services/course_service
+    container_name: otp-micro-course
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    environment:
+      <<: *svc-env
+      DB_NAME: otp_course
+      SERVICE_NAME: course-service
+      USER_SERVICE_URL: http://user-service:8000
+      ASSIGNMENT_SERVICE_URL: http://assignment-service:8000
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ---------- 业务微服务 3：作业与提交服务 ----------
+  assignment-service:
+    build: ./services/assignment_service
+    container_name: otp-micro-assignment
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 25s
+    environment:
+      <<: *svc-env
+      DB_NAME: otp_assignment
+      SERVICE_NAME: assignment-service
+      USER_SERVICE_URL: http://user-service:8000
+      COURSE_SERVICE_URL: http://course-service:8000
+    volumes:
+      - media_micro_data:/app/media
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ---------- API 网关（不计入业务微服务；服务名 backend:8000 与前端约定一致） ----------
+  backend:
+    build: ./services/gateway
+    container_name: otp-micro-gateway
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${GATEWAY_PORT:-8000}:8000"   # 可选：把网关直接暴露到宿主机便于 curl 调试
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8000/api/health/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      user-service:
+        condition: service_healthy
+      course-service:
+        condition: service_healthy
+      assignment-service:
+        condition: service_healthy
+
+  # ---------- 前端（镜像与单体版完全相同，反代 backend:8000 → 网关） ----------
+  frontend:
+    build: ./web_frontend
+    container_name: otp-micro-frontend
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mysql_micro_data:
+  media_micro_data:

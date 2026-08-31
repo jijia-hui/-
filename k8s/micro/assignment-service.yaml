@@ -1,0 +1,111 @@
+# 业务微服务 3：作业与提交服务（作业/提交/评分 + 参考文档 media）
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media-pvc
+  namespace: online-teach-micro
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assignment-service
+  namespace: online-teach-micro
+  labels:
+    app: assignment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assignment-service
+  template:
+    metadata:
+      labels:
+        app: assignment-service
+    spec:
+      containers:
+        - name: assignment-service
+          image: ghcr.io/jijia-hui/otp-assignment-service:__TAG__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_HOST
+              value: mysql
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: otp_assignment
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: db-user}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: db-password}
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: django-secret-key}
+            - name: DJANGO_DEBUG
+              value: "False"
+            - name: DJANGO_ALLOWED_HOSTS
+              value: "*"
+            - name: GUNICORN_WORKERS
+              value: "2"
+            - name: SERVICE_NAME
+              value: assignment-service
+            - name: APP_VERSION
+              value: "__TAG__"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: jwt-secret}
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef: {name: micro-secret, key: internal-api-key}
+            - name: USER_SERVICE_URL
+              value: http://user-service:8000
+            - name: COURSE_SERVICE_URL
+              value: http://course-service:8000
+            - name: TZ
+              value: Asia/Shanghai
+          volumeMounts:
+            - name: media
+              mountPath: /app/media
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /api/ready/
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/live/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assignment-service
+  namespace: online-teach-micro
+spec:
+  selector:
+    app: assignment-service
+  ports:
+    - port: 8000
+      targetPort: 8000

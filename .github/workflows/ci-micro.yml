@@ -1,0 +1,105 @@
+# 微服务版 CI 流水线：按路径检测变更，只测试/构建验证发生变更的服务
+# 触发：推送到 main 或 PR 到 main；也可手动运行（手动=全部服务）
+# 内容：各业务微服务单元+API 测试（SQLite，无需数据库环境）、Docker 镜像构建验证
+name: CI-Micro
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-micro-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: 检测变更的微服务
+    runs-on: ubuntu-latest
+    outputs:
+      user: ${{ steps.filter.outputs.user }}
+      course: ${{ steps.filter.outputs.course }}
+      assignment: ${{ steps.filter.outputs.assignment }}
+      gateway: ${{ steps.filter.outputs.gateway }}
+      any: ${{ steps.filter.outputs.any }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: filter
+        run: |
+          # workflow_dispatch / 首次推送无法取到 before → 视为全部变更
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+            BEFORE="$(git rev-list --max-parents=0 HEAD | head -1)"
+          fi
+          CHANGED=$(git diff --name-only "$BEFORE" HEAD 2>/dev/null || git diff --name-only HEAD~1 HEAD)
+          echo "--- 变更文件（节选） ---"; echo "$CHANGED" | head -50
+          has() { echo "$CHANGED" | grep -qE "$1" && echo true || echo false; }
+          USER=$(has '^services/user_service/')
+          COURSE=$(has '^services/course_service/')
+          ASSIGN=$(has '^services/assignment_service/')
+          GATEWAY=$(has '^services/gateway/')
+          ANY=$([ "$USER" = true ] || [ "$COURSE" = true ] || [ "$ASSIGN" = true ] || [ "$GATEWAY" = true ] && echo true || echo false)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            USER=true; COURSE=true; ASSIGN=true; GATEWAY=true; ANY=true
+          fi
+          {
+            echo "user=$USER"
+            echo "course=$COURSE"
+            echo "assignment=$ASSIGN"
+            echo "gateway=$GATEWAY"
+            echo "any=$ANY"
+          } >> "$GITHUB_OUTPUT"
+
+  test:
+    name: 微服务测试（单元 + API，SQLite）
+    needs: changes
+    if: needs.changes.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: user
+            dir: services/user_service
+            enabled: ${{ needs.changes.outputs.user }}
+          - service: course
+            dir: services/course_service
+            enabled: ${{ needs.changes.outputs.course }}
+          - service: assignment
+            dir: services/assignment_service
+            enabled: ${{ needs.changes.outputs.assignment }}
+    steps:
+      - uses: actions/checkout@v4
+        if: matrix.enabled == 'true'
+      - uses: actions/setup-python@v5
+        if: matrix.enabled == 'true'
+        with:
+          python-version: '3.12'
+      - name: 安装依赖
+        if: matrix.enabled == 'true'
+        run: pip install -r ${{ matrix.dir }}/requirements.txt
+      - name: 单元 + API 测试（跨服务调用已 mock，无需真实依赖）
+        if: matrix.enabled == 'true'
+        working-directory: ${{ matrix.dir }}
+        env:
+          USE_SQLITE: '1'
+        run: python manage.py test tests -v 1
+
+  docker-build:
+    name: 微服务镜像构建验证
+    needs: changes
+    if: needs.changes.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 构建变更服务的镜像
+        run: |
+          [ "${{ needs.changes.outputs.user }}" = true ] && docker build -t otp-user-service:ci ./services/user_service
+          [ "${{ needs.changes.outputs.course }}" = true ] && docker build -t otp-course-service:ci ./services/course_service
+          [ "${{ needs.changes.outputs.assignment }}" = true ] && docker build -t otp-assignment-service:ci ./services/assignment_service
+          [ "${{ needs.changes.outputs.gateway }}" = true ] && docker build -t otp-gateway:ci ./services/gateway
+          docker images | grep otp-
