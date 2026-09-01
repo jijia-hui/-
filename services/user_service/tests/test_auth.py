@@ -105,6 +105,26 @@ class MeTests(TestCase):
         resp = self.client.get('/api/users/me/')
         self.assertEqual(resp.status_code, 403)
 
+    def test_list_visibility_teacher_sees_all_student_sees_self(self):
+        teacher = create_user('v_tea', is_teacher=True)
+        stu1 = create_user('v_stu1')
+        create_user('v_stu2')
+        rows_t = client_for(teacher).get('/api/users/').data['results']
+        self.assertEqual(len(rows_t), 3)  # 教师可见全部
+        rows_s = client_for(stu1).get('/api/users/').data['results']
+        self.assertEqual([u['id'] for u in rows_s], [stu1.id])  # 学生只可见自己
+
+    def test_retrieve_other_user_forbidden_for_student(self):
+        teacher = create_user('v_tea2', is_teacher=True)
+        stu = create_user('v_stu3')
+        # 学生可见范围只有自己 → 查看他人 404
+        resp = client_for(stu).get(f'/api/users/{teacher.id}/')
+        self.assertEqual(resp.status_code, 404)
+        # 查看自己 200
+        resp2 = client_for(stu).get(f'/api/users/{stu.id}/')
+        self.assertEqual(resp2.status_code, 200)
+        self.assertEqual(resp2.data['username'], 'v_stu3')
+
     def test_expired_token_rejected(self):
         user = create_user('me_stu2')
         from datetime import datetime, timedelta, timezone as tz
