@@ -1,4 +1,4 @@
-# 作业/提交剩余单体（Django + gunicorn，SERVICE_ROLE=app）+ 媒体文件持久化卷 + 服务
+# 作业服务（与其它业务服务同一镜像，SERVICE_ROLE=assignment）+ 媒体文件持久化
 # 镜像版本号由部署脚本替换 __IMAGE_TAG__（禁止使用 latest）
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -14,20 +14,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: assignment-service
   namespace: online-teach
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: assignment-service
   template:
     metadata:
       labels:
-        app: backend
+        app: assignment-service
     spec:
       containers:
-        - name: backend
+        - name: assignment-service
           image: ghcr.io/jijia-hui/online-teaching-platform-backend:__IMAGE_TAG__
           imagePullPolicy: IfNotPresent
           ports:
@@ -60,7 +60,9 @@ spec:
             - name: GUNICORN_WORKERS
               value: "2"
             - name: SERVICE_ROLE
-              value: "app"
+              value: "assignment"
+            - name: COURSE_SERVICE_URL
+              value: "http://course-service:8000"
           volumeMounts:
             - name: media
               mountPath: /app/media
@@ -84,11 +86,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend
+  name: assignment-service
   namespace: online-teach
 spec:
   selector:
-    app: backend
+    app: assignment-service
   ports:
     - port: 8000
       targetPort: 8000

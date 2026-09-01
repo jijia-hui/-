@@ -9,8 +9,8 @@ from .views import (
 # 对外路由由 web_backend.urls 按 SERVICE_ROLE 组装：
 #   user   = 注册/登录/用户/Admin
 #   course = 课程 CRUD / 选课退课
-#   app    = 作业/提交/评分（剩余单体）
-#   all    = 本地 runserver / 单测，一个进程提供全部接口
+#   assignment = 作业/提交/评分/媒体
+#   all        = 本地 runserver / 单测，一个进程提供全部接口
 
 
 def user_urlpatterns():
@@ -41,7 +41,7 @@ def course_urlpatterns():
     ]
 
 
-def app_urlpatterns():
+def assignment_urlpatterns():
     router = DefaultRouter()
     router.register(r'assignments', AssignmentViewSet)
     router.register(r'submissions', SubmissionViewSet)
@@ -50,9 +50,12 @@ def app_urlpatterns():
     ]
 
 
+app_urlpatterns = assignment_urlpatterns  # 兼容旧名
+
+
 urlpatterns = [
     path('api/health/', health, name='health'),
     *user_urlpatterns(),
     *course_urlpatterns(),
-    *app_urlpatterns(),
+    *assignment_urlpatterns(),
 ]

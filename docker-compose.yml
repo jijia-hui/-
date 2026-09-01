@@ -1,9 +1,9 @@
 # 在线教学与实训平台 - Docker Compose 编排
 # 启动: docker compose up -d --build
 # 访问: http://localhost:${WEB_PORT:-8080}
-# 演示数据: docker compose exec backend python manage.py seed_data
+# 演示数据: docker compose exec assignment-service python manage.py seed_data
 #
-# 第二刀：course-service 独立进程（课程/选课）；backend 仍承担作业/提交。
+# 第三刀：三个业务服务齐全（user / course / assignment）。
 # 可通过根目录 .env 覆盖变量（不要把 USE_SQLITE=1 写进容器环境）
 services:
   mysql:
@@ -30,9 +30,9 @@ services:
       retries: 20
       start_period: 45s
 
-  backend:
+  assignment-service:
     build: ./web_backend
-    container_name: otp-backend
+    container_name: otp-assignment-service
     restart: unless-stopped
     init: true
     stop_grace_period: 25s
@@ -48,13 +48,9 @@ services:
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
       DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-2}
-      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
-      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
-      EMAIL_HOST: ${EMAIL_HOST:-smtp.qq.com}
-      EMAIL_PORT: ${EMAIL_PORT:-465}
-      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
-      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-False}
-      SERVICE_ROLE: app
+      SERVICE_ROLE: assignment
+      COURSE_SERVICE_URL: http://course-service:8000
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-}
     volumes:
       - media_data:/app/media
     healthcheck:
@@ -71,6 +67,8 @@ services:
       start_period: 40s
     depends_on:
       mysql:
+        condition: service_healthy
+      course-service:
         condition: service_healthy
 
   user-service:
@@ -166,7 +164,7 @@ services:
       retries: 5
       start_period: 5s
     depends_on:
-      backend:
+      assignment-service:
         condition: service_healthy
       user-service:
         condition: service_healthy

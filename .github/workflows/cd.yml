@@ -127,8 +127,8 @@ jobs:
         if: failure()
         run: |
           kubectl -n online-teach get pods -o wide || true
-          kubectl -n online-teach describe deploy/backend deploy/frontend || true
-          kubectl -n online-teach logs -l app=backend --tail=150 || true
+          kubectl -n online-teach describe deploy/user-service deploy/course-service deploy/assignment-service deploy/frontend || true
+          kubectl -n online-teach logs -l app=assignment-service --tail=150 || true
           kubectl -n online-teach logs -l app=frontend --tail=150 || true
         shell: bash
 

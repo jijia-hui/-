@@ -26,16 +26,16 @@ kubectl apply -f "$K8S_DIR/secret.yaml"
 kubectl apply -f "$K8S_DIR/mysql.yaml"
 kubectl -n "$NS" rollout status deploy/mysql --timeout=300s
 
-echo "==> 3/5 部署用户/课程服务、作业后端与前端（镜像版本: $TAG）"
+echo "==> 3/5 部署三个业务服务与前端（镜像版本: $TAG）"
 kubectl create configmap nginx-config --from-file=nginx.conf="$ROOT/web_frontend/nginx.conf" \
     -n "$NS" -o yaml --dry-run=client | kubectl apply -f -
-sed "s|__IMAGE_TAG__|$TAG|g" "$K8S_DIR/backend.yaml" | kubectl apply -f -
 sed "s|__IMAGE_TAG__|$TAG|g" "$K8S_DIR/user-service.yaml" | kubectl apply -f -
 sed "s|__IMAGE_TAG__|$TAG|g" "$K8S_DIR/course-service.yaml" | kubectl apply -f -
+sed "s|__IMAGE_TAG__|$TAG|g" "$K8S_DIR/assignment-service.yaml" | kubectl apply -f -
 sed "s|__IMAGE_TAG__|$TAG|g" "$K8S_DIR/frontend.yaml" | kubectl apply -f -
-kubectl -n "$NS" rollout status deploy/backend --timeout=300s
 kubectl -n "$NS" rollout status deploy/user-service --timeout=300s
 kubectl -n "$NS" rollout status deploy/course-service --timeout=300s
+kubectl -n "$NS" rollout status deploy/assignment-service --timeout=300s
 kubectl -n "$NS" rollout status deploy/frontend --timeout=300s
 
 echo "==> 4/5 健康检查（前端首页 + 后端 /api/health/）"
@@ -67,4 +67,4 @@ echo "==> 健康检查通过: 前端首页 200，/api/health/ 200，/api/users/m
 
 echo "==> 5/5 部署完成"
 echo "    本机访问: kubectl -n $NS port-forward svc/frontend 8080:80"
-echo "    初始化演示数据: kubectl -n $NS exec deploy/backend -- python manage.py seed_data"
+echo "    初始化演示数据: kubectl -n $NS exec deploy/assignment-service -- python manage.py seed_data"

@@ -1,4 +1,4 @@
-# 前端（Nginx 托管静态资源 + 反向代理 /api /media /static 到后端）+ 服务
+# 前端（Nginx 按路径反代到 user / course / assignment）+ 服务
 # 镜像版本号由部署脚本替换 __IMAGE_TAG__（禁止使用 latest）
 # Nginx 配置由部署脚本从 web_frontend/nginx.conf 生成 ConfigMap（保持单一来源）
 apiVersion: apps/v1

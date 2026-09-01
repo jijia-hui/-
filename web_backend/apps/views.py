@@ -19,6 +19,7 @@ from django.utils import timezone
 from .models import User, Course, Assignment, Submission, EmailVerificationCode
 from .serializers import UserSerializer, CourseSerializer, AssignmentSerializer, SubmissionSerializer
 from .permissions import IsCourseTeacherOrReadOnly
+from .course_client import student_is_enrolled, is_course_teacher
 
 logger = logging.getLogger(__name__)
 
@@ -255,8 +256,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         # 权限：教师不能提交作业
         if request.user.is_teacher:
             return Response({'detail': '教师不能提交作业'}, status=status.HTTP_403_FORBIDDEN)
-        # 权限：必须先选该课程
-        if not assignment.course.students.filter(id=request.user.id).exists():
+        if not student_is_enrolled(assignment.course_id, request.user.id):
             return Response({'detail': '请先选课再提交作业'}, status=status.HTTP_403_FORBIDDEN)
         # 截止时间校验
         if assignment.is_expired():
@@ -280,8 +280,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         # 权限：只有教师（且是该课程教师）可以评分
         if not request.user.is_teacher:
             return Response({'detail': '只有教师可以评分'}, status=status.HTTP_403_FORBIDDEN)
-        # 检查教师是否是该作业课程的教师
-        if submission.assignment.course.teacher != request.user:
+        if not is_course_teacher(submission.assignment.course_id, request.user.id):
             return Response({'detail': '你无权评分此提交'}, status=status.HTTP_403_FORBIDDEN)
 
         score = request.data.get('score')

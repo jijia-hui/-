@@ -1,7 +1,7 @@
 # 测试/演示数据脚本（幂等，可重复执行）
 # 用法：
 #   本地:  python web_backend/manage.py seed_data
-#   容器:  docker compose exec backend python manage.py seed_data
+#   容器:  docker compose exec assignment-service python manage.py seed_data
 #   删除演示账号/课程：按用户名/课程编号删除后重新执行即可
 from datetime import timedelta
 

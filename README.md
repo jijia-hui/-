@@ -29,12 +29,12 @@ docker compose up -d --build
 ```
 
 启动完成后访问 http://localhost:8080 （端口可通过 `.env` 中的 `WEB_PORT` 修改）。
-Compose 会启动 MySQL、**user-service**（注册/登录）、**course-service**（课程/选课）、**backend**（作业/提交）和前端。
+Compose 会启动 MySQL、**user-service**、**course-service**、**assignment-service** 和前端。
 
 ### 测试数据
 
 ```bash
-docker compose exec backend python manage.py seed_data
+docker compose exec assignment-service python manage.py seed_data
 ```
 
 脚本幂等（可重复执行），会创建演示账号与课程作业：
@@ -46,8 +46,8 @@ docker compose exec backend python manage.py seed_data
 
 ```bash
 docker compose ps                # 查看服务状态
-docker compose logs -f backend   # 跟踪后端日志
-docker compose restart backend   # 重启单个服务
+docker compose logs -f assignment-service   # 跟踪作业服务日志
+docker compose restart assignment-service   # 重启单个服务
 docker compose down              # 停止（数据保留在卷中）
 docker compose up -d --build     # 代码变更后重新构建
 docker compose exec user-service python manage.py createsuperuser   # 后台管理员（用户服务）

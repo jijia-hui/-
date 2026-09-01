@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""SERVICE_ROLE：user / course / app 三进程拆分的路由与内部接口。"""
+"""SERVICE_ROLE：user / course / assignment 三进程拆分的路由与内部接口。"""
+import os
+from unittest.mock import patch
+
 from django.urls.resolvers import URLPattern, URLResolver
 from django.test import TestCase
 from rest_framework.test import APIClient
@@ -34,13 +37,18 @@ class ServiceRoleUrlTest(TestCase):
         self.assertNotIn('assignment-list', names)
         self.assertNotIn('api_token_auth', names)
 
-    def test_app_role_has_assignments_not_courses(self):
-        names = collect_names(build_urlpatterns('app'))
+    def test_assignment_role_has_assignments_not_courses(self):
+        names = collect_names(build_urlpatterns('assignment'))
         self.assertIn('assignment-list', names)
         self.assertIn('submission-list', names)
         self.assertNotIn('course-list', names)
         self.assertNotIn('api_token_auth', names)
         self.assertNotIn('send_verification_code', names)
+
+    def test_app_alias_maps_to_assignment(self):
+        names = collect_names(build_urlpatterns('app'))
+        self.assertIn('assignment-list', names)
+        self.assertNotIn('course-list', names)
 
     def test_all_role_has_user_course_and_app(self):
         names = collect_names(build_urlpatterns('all'))
@@ -89,3 +97,33 @@ class InternalCourseApiTest(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.data['teacher_id'], self.teacher.id)
         self.assertEqual(res.data['username'], 'cteach')
+
+
+class CourseClientTest(TestCase):
+    def setUp(self):
+        self.teacher = User.objects.create_user(
+            username='cli_t', password='x', is_teacher=True, email='clt@example.com',
+        )
+        self.student = User.objects.create_user(
+            username='cli_s', password='x', email='cls@example.com',
+        )
+        self.course = Course.objects.create(name='网络', code='CN101', teacher=self.teacher)
+        self.course.students.add(self.student)
+
+    def test_fallback_uses_local_tables(self):
+        from apps.course_client import is_course_teacher, student_is_enrolled
+        self.assertTrue(student_is_enrolled(self.course.id, self.student.id))
+        self.assertFalse(student_is_enrolled(self.course.id, self.teacher.id))
+        self.assertTrue(is_course_teacher(self.course.id, self.teacher.id))
+        self.assertFalse(is_course_teacher(self.course.id, self.student.id))
+
+    def test_http_path_when_course_service_url_set(self):
+        from apps.course_client import student_is_enrolled
+        with patch.dict(os.environ, {'COURSE_SERVICE_URL': 'http://course-service:8000'}):
+            with patch('apps.course_client.requests.get') as mock_get:
+                mock_get.return_value.json.return_value = {'enrolled': True}
+                mock_get.return_value.raise_for_status.return_value = None
+                self.assertTrue(student_is_enrolled(self.course.id, self.student.id))
+                called_url = mock_get.call_args[0][0]
+        self.assertIn(f'/internal/courses/{self.course.id}/enrollment/{self.student.id}/', called_url)
+
