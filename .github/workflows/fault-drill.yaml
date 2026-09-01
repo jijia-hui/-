@@ -1,0 +1,232 @@
+# .github/workflows/fault-drill.yaml
+name: 云原生故障演练
+
+on:
+  workflow_dispatch:
+    inputs:
+      fault_id:
+        description: '故障编号 (F1-F6)'
+        required: true
+        type: choice
+        options:
+          - F1
+          - F2
+          - F3
+          - F4
+          - F5
+          - F6
+      auto_heal:
+        description: '是否自动修复'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  NAMESPACE: default
+  CLUSTER_NAME: teaching-lab
+
+jobs:
+  # ===== 阶段一：故障注入 =====
+  inject:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 连接 K8s 集群
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: 注入故障 ${{ inputs.fault_id }}
+        run: |
+          chmod +x scripts/fault-inject.sh
+          ./scripts/fault-inject.sh ${{ inputs.fault_id }}
+
+      - name: 等待故障生效
+        run: sleep 30
+
+  # ===== 阶段二：故障检测 =====
+  detect:
+    needs: inject
+    runs-on: ubuntu-latest
+    outputs:
+      fault_detected: ${{ steps.detect.outputs.detected }}
+      fault_type: ${{ steps.detect.outputs.type }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 连接 K8s 集群
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: 执行故障检测
+        id: detect
+        run: |
+          DETECTED="false"
+          FAULT_TYPE="unknown"
+
+          case "${{ inputs.fault_id }}" in
+            F1)
+              # 检测 CrashLoopBackOff
+              STATUS=$(kubectl get pods -n $NAMESPACE -l app=user-service \
+                       -o jsonpath='{.items[0].status.containerStatuses[0].state.waiting.reason}')
+              if [ "$STATUS" = "CrashLoopBackOff" ] || [ "$STATUS" = "OOMKilled" ]; then
+                DETECTED="true"
+                FAULT_TYPE="oom_crash"
+              fi
+              ;;
+            F2)
+              # 检测 ImagePullBackOff
+              STATUS=$(kubectl get pods -n $NAMESPACE -l app=course-service \
+                       -o jsonpath='{.items[0].status.containerStatuses[0].state.waiting.reason}')
+              if [ "$STATUS" = "ImagePullBackOff" ] || [ "$STATUS" = "ErrImagePull" ]; then
+                DETECTED="true"
+                FAULT_TYPE="image_pull_failed"
+              fi
+              ;;
+            F3)
+              # 检测健康检查失败（Pod 不在 Ready 状态）
+              READY=$(kubectl get pods -n $NAMESPACE -l app=assignment-service \
+                      -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}')
+              if [ "$READY" = "False" ]; then
+                DETECTED="true"
+                FAULT_TYPE="health_check_failed"
+              fi
+              ;;
+            F4)
+              # 检测 502（通过 curl 网关）
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+                          http://$(kubectl get svc nginx-gateway -n $NAMESPACE \
+                          -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/api/health/)
+              if [ "$HTTP_CODE" = "502" ]; then
+                DETECTED="true"
+                FAULT_TYPE="gateway_502"
+              fi
+              ;;
+            F5)
+              # 检测 MySQL 连接池耗尽（通过接口超时）
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+                          --max-time 10 \
+                          http://$(kubectl get svc nginx-gateway -n $NAMESPACE \
+                          -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/api/assignments/)
+              if [ "$HTTP_CODE" = "504" ] || [ "$HTTP_CODE" = "503" ]; then
+                DETECTED="true"
+                FAULT_TYPE="db_connection_exhausted"
+              fi
+              ;;
+            F6)
+              # 检测跨服务调用超时
+              RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" \
+                              http://$(kubectl get svc nginx-gateway -n $NAMESPACE \
+                              -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/api/courses/)
+              if (( $(echo "$RESPONSE_TIME > 5.0" | bc -l) )); then
+                DETECTED="true"
+                FAULT_TYPE="cross_service_timeout"
+              fi
+              ;;
+          esac
+
+          echo "detected=$DETECTED" >> $GITHUB_OUTPUT
+          echo "type=$FAULT_TYPE" >> $GITHUB_OUTPUT
+          echo "🔍 故障检测结果: detected=$DETECTED, type=$FAULT_TYPE"
+
+      - name: 收集诊断信息
+        if: steps.detect.outputs.detected == 'true'
+        run: |
+          echo "===== Pod 状态 ====="
+          kubectl get pods -n $NAMESPACE -o wide
+          echo ""
+          echo "===== Pod 事件 ====="
+          kubectl describe pods -n $NAMESPACE -l app=${{ inputs.fault_id == 'F1' && 'user-service' || inputs.fault_id == 'F2' && 'course-service' || 'assignment-service' }} | tail -30
+          echo ""
+          echo "===== 最近日志 ====="
+          kubectl logs -n $NAMESPACE -l app=${{ inputs.fault_id == 'F1' && 'user-service' || inputs.fault_id == 'F2' && 'course-service' || 'assignment-service' }} --tail=50 --previous || true
+
+  # ===== 阶段三：自动处理 =====
+  heal:
+    needs: detect
+    if: inputs.auto_heal && needs.detect.outputs.fault_detected == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 连接 K8s 集群
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: 执行自动修复
+        run: |
+          chmod +x scripts/fault-inject.sh
+          ./scripts/fault-inject.sh ${{ inputs.fault_id }} recover
+
+      - name: 等待修复生效
+        run: sleep 60
+
+  # ===== 阶段四：验证恢复 =====
+  verify:
+    needs: [detect, heal]
+    if: always() && needs.heal.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 连接 K8s 集群
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: 验证服务恢复
+        run: |
+          echo "===== 验证所有 Pod 状态 ====="
+          kubectl get pods -n $NAMESPACE
+
+          echo ""
+          echo "===== 验证服务健康 ====="
+          GATEWAY_IP=$(kubectl get svc nginx-gateway -n $NAMESPACE \
+                       -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+          for endpoint in "/api/health/" "/api/courses/" "/api/assignments/"; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
+                        "http://${GATEWAY_IP}${endpoint}")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ ${endpoint} -> ${HTTP_CODE}"
+            else
+              echo "❌ ${endpoint} -> ${HTTP_CODE}"
+              exit 1
+            fi
+          done
+
+          echo ""
+          echo "🎉 故障演练完成：${{ inputs.fault_id }} 已成功恢复"
+
+      - name: 生成演练报告
+        if: always()
+        run: |
+          cat > fault-drill-report.md << EOF
+          # 故障演练报告
+
+          - **故障编号**: ${{ inputs.fault_id }}
+          - **故障类型**: ${{ needs.detect.outputs.fault_type }}
+          - **检测成功**: ${{ needs.detect.outputs.fault_detected }}
+          - **自动修复**: ${{ inputs.auto_heal }}
+          - **执行时间**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          ## 处理流程
+          1. 故障注入 → 完成
+          2. 故障检测 → ${{ needs.detect.outputs.fault_detected == 'true' && '✅ 成功识别' || '❌ 未检测到' }}
+          3. 自动修复 → ${{ needs.heal.result == 'success' && '✅ 修复成功' || '⏭️ 跳过' }}
+          4. 恢复验证 → 见上方步骤输出
+          EOF
+
+      - name: 上传演练报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fault-drill-report-${{ inputs.fault_id }}
+          path: fault-drill-report.md
