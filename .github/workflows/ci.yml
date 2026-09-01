@@ -1,11 +1,11 @@
 # 在线教学与实训平台 - CI 流水线
-# 触发：推送到 main 或 PR 到 main；也可手动运行（workflow_dispatch）
+# 触发：推送到 main / check8.27，或 PR 到 main；也可手动运行
 # 内容：后端单元/集成/E2E 测试（MySQL 8 服务容器）、前端构建、Docker 镜像构建验证
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, check8.27]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -102,3 +102,16 @@ jobs:
 
       - name: 构建前端镜像
         run: docker build -t otp-frontend:ci ./web_frontend
+
+      - name: 校验三服务 Compose 清单
+        run: |
+          set -e
+          services=$(docker compose config --services)
+          echo "$services"
+          echo "$services" | grep -qx user-service
+          echo "$services" | grep -qx course-service
+          echo "$services" | grep -qx assignment-service
+          echo "$services" | grep -qx frontend
+          echo "$services" | grep -qx mysql
+          test "$(echo "$services" | wc -l)" -eq 5
+          echo "Compose 服务清单校验通过"

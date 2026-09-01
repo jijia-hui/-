@@ -38,8 +38,9 @@ kubectl -n "$NS" rollout status deploy/course-service --timeout=300s
 kubectl -n "$NS" rollout status deploy/assignment-service --timeout=300s
 kubectl -n "$NS" rollout status deploy/frontend --timeout=300s
 
-echo "==> 4/5 健康检查（前端首页 + 后端 /api/health/）"
+echo "==> 4/5 健康检查（网关 + 三服务路由）"
 kubectl -n "$NS" get pods
+kubectl -n "$NS" get deploy user-service course-service assignment-service frontend
 kubectl -n "$NS" port-forward svc/frontend 8080:80 --address 127.0.0.1 >/dev/null 2>&1 &
 PF_PID=$!
 trap 'kill "$PF_PID" 2>/dev/null || true' EXIT
@@ -55,15 +56,25 @@ for ((i = 1; i <= 30; i++)); do
 done
 HEALTH=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/health/ || true)
 if [ "$HEALTH" != "200" ]; then
-    echo "错误: 后端健康检查失败（期望 /api/health/ HTTP 200，实际 $HEALTH）"
+    echo "错误: 作业服务健康检查失败（期望 /api/health/ HTTP 200，实际 $HEALTH）"
     exit 1
 fi
 CODE=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/users/me/ || true)
 if [ "$CODE" != "401" ] && [ "$CODE" != "403" ]; then
-    echo "错误: 后端 API 鉴权检查失败（期望 401/403，实际 HTTP $CODE）"
+    echo "错误: 用户服务路由失败（期望 /api/users/me/ 401/403，实际 HTTP $CODE）"
     exit 1
 fi
-echo "==> 健康检查通过: 前端首页 200，/api/health/ 200，/api/users/me/ $CODE"
+COURSES=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/courses/ || true)
+if [ "$COURSES" != "401" ] && [ "$COURSES" != "403" ]; then
+    echo "错误: 课程服务路由失败（期望 /api/courses/ 401/403，实际 HTTP $COURSES）"
+    exit 1
+fi
+ASSIGN=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/assignments/ || true)
+if [ "$ASSIGN" != "401" ] && [ "$ASSIGN" != "403" ]; then
+    echo "错误: 作业服务路由失败（期望 /api/assignments/ 401/403，实际 HTTP $ASSIGN）"
+    exit 1
+fi
+echo "==> 健康检查通过: 首页 200，health $HEALTH，users/me $CODE，courses $COURSES，assignments $ASSIGN"
 
 echo "==> 5/5 部署完成"
 echo "    本机访问: kubectl -n $NS port-forward svc/frontend 8080:80"

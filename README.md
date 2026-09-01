@@ -46,6 +46,7 @@ docker compose exec assignment-service python manage.py seed_data
 
 ```bash
 docker compose ps                # 查看服务状态
+python scripts/verify_gateway.py # 校验三服务是否经 8080 可达
 docker compose logs -f assignment-service   # 跟踪作业服务日志
 docker compose restart assignment-service   # 重启单个服务
 docker compose down              # 停止（数据保留在卷中）
@@ -71,18 +72,19 @@ docker compose exec user-service python manage.py createsuperuser   # 后台管�
 
 ## CI/CD（GitHub Actions）
 
-推送到 `main`：CI 自动执行单元/集成/E2E 测试与前后端构建；CD 测试通过后制作**版本化镜像**（提交 SHA 或 `v*` 标签）推送 GHCR，并部署到 Kubernetes（kind）完成健康检查。任一环节失败即停止，后续部署不执行；运行日志与失败诊断均保留为构建产物。详见 `部署文档.md`。
+推送到 `main` 或 `check8.27`：CI 自动测试并校验 Compose 三服务清单；CD 制作版本化镜像，部署到 Kubernetes（kind），并检查用户/课程/作业三条网关路由。详见 `部署文档.md`。
 
 ## 目录结构
 
 ```text
 online_teaching_platform/
-├── docker-compose.yml        # 容器编排（mysql / backend / frontend）
-├── web_backend/              # Django 后端（Dockerfile、entrypoint.sh）
-├── web_frontend/             # React 前端（Dockerfile、nginx.conf）
-├── k8s/                      # Kubernetes 部署清单
-├── scripts/deploy_k8s.sh     # K8s 部署 + 健康检查脚本
-├── .github/workflows/        # CI / CD 流水线
+├── docker-compose.yml        # mysql / user / course / assignment / frontend
+├── web_backend/              # Django 后端（三服务共用镜像，SERVICE_ROLE 区分）
+├── web_frontend/             # React 前端（Nginx 网关）
+├── k8s/                      # 各服务独立 Deployment
+├── scripts/deploy_k8s.sh     # K8s 部署 + 三服务路由检查
+├── scripts/verify_gateway.py # Compose 网关验收
+├── .github/workflows/        # CI / CD（含 check8.27）
 ├── 04_tests/                 # 单元 / 集成 / 端到端测试
 └── 部署文档.md               # 完整部署与 CI/CD 说明
 ```
