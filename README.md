@@ -154,6 +154,11 @@ docker compose exec backend python manage.py createsuperuser   # 后台管理员
 
 详细说明见 `04_tests/README.md`。
 
+### 性能对比实验
+
+单体版与微服务版的统一压测脚本、54 份原始结果、汇总数据、图表和分析报告见
+[`04_tests/performance/`](04_tests/performance/)。其中 `load_test.py` 使用相同请求逻辑统计吞吐量、平均/P95 响应时间、错误率及 Docker 容器 CPU/内存；`性能对比报告.md` 记录了实验条件、结果解释和复现命令。
+
 ## CI/CD（GitHub Actions）
 
 **单体版**（`ci.yml` / `cd.yml`）：推送到 `main` 后自动执行单元/集成/E2E 测试与前后端构建；CD 测试通过后制作**版本化镜像**（提交 SHA 或 `v*` 标签）推送 GHCR，并部署到 Kubernetes（kind）完成健康检查。任一环节失败即停止。

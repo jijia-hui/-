@@ -1,0 +1,2 @@
+# Shell entrypoints and deployment scripts must remain executable with LF on Linux containers.
+*.sh text eol=lf
