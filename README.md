@@ -88,3 +88,5 @@ online_teaching_platform/
 ├── 04_tests/                 # 单元 / 集成 / 端到端测试
 └── 部署文档.md               # 完整部署与 CI/CD 说明
 ```
+
+<!-- demo-pipeline 2026-09-03 -->
