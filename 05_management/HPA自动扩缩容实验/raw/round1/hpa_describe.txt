@@ -1,0 +1,39 @@
+Name:                                                  user-service-hpa
+Namespace:                                             online-teach-micro
+Labels:                                                app=user-service
+Annotations:                                           <none>
+CreationTimestamp:                                     Fri, 04 Sep 2026 14:43:01 +0800
+Reference:                                             Deployment/user-service
+Metrics:                                               ( current / target )
+  resource cpu on pods  (as a percentage of request):  2% (2m) / 70%
+Min replicas:                                          2
+Max replicas:                                          8
+Behavior:
+  Scale Up:
+    Stabilization Window: 30 seconds
+    Select Policy: Max
+    Policies:
+      - Type: Pods  Value: 2  Period: 60 seconds
+  Scale Down:
+    Stabilization Window: 300 seconds
+    Select Policy: Max
+    Policies:
+      - Type: Pods  Value: 1  Period: 120 seconds
+Deployment pods:    4 current / 3 desired
+Conditions:
+  Type            Status  Reason            Message
+  ----            ------  ------            -------
+  AbleToScale     True    SucceededRescale  the HPA controller was able to update the target scale to 3
+  ScalingActive   True    ValidMetricFound  the HPA was able to successfully calculate a replica count from cpu resource utilization (percentage of request)
+  ScalingLimited  True    ScaleDownLimit    the desired replica count is decreasing faster than the maximum scale rate
+Events:
+  Type    Reason             Age    From                       Message
+  ----    ------             ----   ----                       -------
+  Normal  SuccessfulRescale  16m    horizontal-pod-autoscaler  New size: 4; reason: cpu resource utilization (percentage of request) above target
+  Normal  SuccessfulRescale  15m    horizontal-pod-autoscaler  New size: 6; reason: cpu resource utilization (percentage of request) above target
+  Normal  SuccessfulRescale  14m    horizontal-pod-autoscaler  New size: 8; reason: cpu resource utilization (percentage of request) above target
+  Normal  SuccessfulRescale  8m20s  horizontal-pod-autoscaler  New size: 7; reason: All metrics below target
+  Normal  SuccessfulRescale  6m20s  horizontal-pod-autoscaler  New size: 6; reason: All metrics below target
+  Normal  SuccessfulRescale  4m20s  horizontal-pod-autoscaler  New size: 5; reason: All metrics below target
+  Normal  SuccessfulRescale  2m20s  horizontal-pod-autoscaler  New size: 4; reason: All metrics below target
+  Normal  SuccessfulRescale  20s    horizontal-pod-autoscaler  New size: 3; reason: All metrics below target

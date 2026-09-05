@@ -1,0 +1,166 @@
+58m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-mm7cz
+58m         Normal    Scheduled           pod/user-service-59d5d7f794-mm7cz          Successfully assigned online-teach-micro/user-service-59d5d7f794-mm7cz to docker-desktop
+58m         Normal    Scheduled           pod/user-service-59d5d7f794-2mpxn          Successfully assigned online-teach-micro/user-service-59d5d7f794-2mpxn to docker-desktop
+58m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-2mpxn
+58m         Normal    Pulled              pod/user-service-59d5d7f794-mm7cz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+58m         Normal    Started             pod/user-service-59d5d7f794-mm7cz          Container started
+58m         Normal    Created             pod/user-service-59d5d7f794-mm7cz          Container created
+58m         Normal    Pulled              pod/user-service-59d5d7f794-2mpxn          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+58m         Normal    Created             pod/user-service-59d5d7f794-2mpxn          Container created
+58m         Normal    Started             pod/user-service-59d5d7f794-2mpxn          Container started
+58m         Warning   Unhealthy           pod/user-service-59d5d7f794-gfnsw          Liveness probe failed: Get "http://10.1.0.132:8000/api/live/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+57m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-pm2xc
+57m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-q7ncd
+57m         Normal    Scheduled           pod/user-service-59d5d7f794-pm2xc          Successfully assigned online-teach-micro/user-service-59d5d7f794-pm2xc to docker-desktop
+57m         Normal    Scheduled           pod/user-service-59d5d7f794-q7ncd          Successfully assigned online-teach-micro/user-service-59d5d7f794-q7ncd to docker-desktop
+57m         Normal    Created             pod/user-service-59d5d7f794-q7ncd          Container created
+57m         Normal    Started             pod/user-service-59d5d7f794-q7ncd          Container started
+57m         Normal    Started             pod/user-service-59d5d7f794-pm2xc          Container started
+57m         Normal    Created             pod/user-service-59d5d7f794-pm2xc          Container created
+57m         Normal    Pulled              pod/user-service-59d5d7f794-pm2xc          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+57m         Normal    Pulled              pod/user-service-59d5d7f794-q7ncd          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+56m         Warning   Unhealthy           pod/user-service-59d5d7f794-mm7cz          Readiness probe failed: Get "http://10.1.0.139:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+56m         Normal    Scheduled           pod/user-service-59d5d7f794-rvmll          Successfully assigned online-teach-micro/user-service-59d5d7f794-rvmll to docker-desktop
+56m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-cnn64
+56m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-rvmll
+56m         Normal    Scheduled           pod/user-service-59d5d7f794-cnn64          Successfully assigned online-teach-micro/user-service-59d5d7f794-cnn64 to docker-desktop
+56m         Normal    Started             pod/user-service-59d5d7f794-rvmll          Container started
+56m         Normal    Created             pod/user-service-59d5d7f794-rvmll          Container created
+56m         Normal    Pulled              pod/user-service-59d5d7f794-rvmll          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+56m         Normal    Pulled              pod/user-service-59d5d7f794-cnn64          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+56m         Normal    Started             pod/user-service-59d5d7f794-cnn64          Container started
+56m         Normal    Created             pod/user-service-59d5d7f794-cnn64          Container created
+56m         Warning   Unhealthy           pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.129:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+55m         Warning   Unhealthy           pod/user-service-59d5d7f794-rvmll          Readiness probe failed: Get "http://10.1.0.142:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+55m         Warning   Unhealthy           pod/user-service-59d5d7f794-cnn64          Readiness probe failed: Get "http://10.1.0.143:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+55m         Warning   Unhealthy           pod/user-service-59d5d7f794-gfnsw          Readiness probe failed: Get "http://10.1.0.132:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+50m         Normal    Killing             pod/user-service-59d5d7f794-cnn64          Stopping container user-service
+50m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-cnn64
+48m         Normal    Killing             pod/user-service-59d5d7f794-rvmll          Stopping container user-service
+48m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-rvmll
+46m         Normal    Killing             pod/user-service-59d5d7f794-mm7cz          Stopping container user-service
+46m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-mm7cz
+44m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-rfzwz
+44m         Normal    Killing             pod/user-service-59d5d7f794-rfzwz          Stopping container user-service
+42m         Normal    Killing             pod/user-service-59d5d7f794-q7ncd          Stopping container user-service
+42m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-q7ncd
+42m         Warning   Unhealthy           pod/user-service-59d5d7f794-q7ncd          Readiness probe failed: Get "http://10.1.0.141:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+40m         Normal    Killing             pod/user-service-59d5d7f794-gfnsw          Stopping container user-service
+40m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-gfnsw
+37m         Warning   Unhealthy           pod/user-service-59d5d7f794-pm2xc          Liveness probe failed: Get "http://10.1.0.140:8000/api/live/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+37m         Normal    Scheduled           pod/user-service-59d5d7f794-s99kg          Successfully assigned online-teach-micro/user-service-59d5d7f794-s99kg to docker-desktop
+37m         Normal    Scheduled           pod/user-service-59d5d7f794-ld2xh          Successfully assigned online-teach-micro/user-service-59d5d7f794-ld2xh to docker-desktop
+37m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-ld2xh
+37m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-s99kg
+37m         Normal    Pulled              pod/user-service-59d5d7f794-ld2xh          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+37m         Normal    Pulled              pod/user-service-59d5d7f794-s99kg          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+37m         Normal    Started             pod/user-service-59d5d7f794-ld2xh          Container started
+37m         Normal    Started             pod/user-service-59d5d7f794-s99kg          Container started
+37m         Normal    Created             pod/user-service-59d5d7f794-s99kg          Container created
+37m         Normal    Created             pod/user-service-59d5d7f794-ld2xh          Container created
+37m         Warning   Unhealthy           pod/user-service-59d5d7f794-2mpxn          Liveness probe failed: Get "http://10.1.0.138:8000/api/live/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+36m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-qm6c7
+36m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-t5xw7
+36m         Normal    Scheduled           pod/user-service-59d5d7f794-t5xw7          Successfully assigned online-teach-micro/user-service-59d5d7f794-t5xw7 to docker-desktop
+36m         Normal    Scheduled           pod/user-service-59d5d7f794-qm6c7          Successfully assigned online-teach-micro/user-service-59d5d7f794-qm6c7 to docker-desktop
+36m         Normal    Pulled              pod/user-service-59d5d7f794-t5xw7          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+36m         Normal    Pulled              pod/user-service-59d5d7f794-qm6c7          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+36m         Normal    Created             pod/user-service-59d5d7f794-t5xw7          Container created
+36m         Normal    Created             pod/user-service-59d5d7f794-qm6c7          Container created
+36m         Normal    Started             pod/user-service-59d5d7f794-t5xw7          Container started
+36m         Normal    Started             pod/user-service-59d5d7f794-qm6c7          Container started
+36m         Warning   Unhealthy           pod/user-service-59d5d7f794-ld2xh          Readiness probe failed: Get "http://10.1.0.144:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+35m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-87hw4
+35m         Normal    Scheduled           pod/user-service-59d5d7f794-87hw4          Successfully assigned online-teach-micro/user-service-59d5d7f794-87hw4 to docker-desktop
+35m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-52mjg
+35m         Normal    Pulled              pod/user-service-59d5d7f794-52mjg          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+35m         Normal    Pulled              pod/user-service-59d5d7f794-87hw4          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+35m         Normal    Scheduled           pod/user-service-59d5d7f794-52mjg          Successfully assigned online-teach-micro/user-service-59d5d7f794-52mjg to docker-desktop
+35m         Normal    Started             pod/user-service-59d5d7f794-87hw4          Container started
+35m         Normal    Started             pod/user-service-59d5d7f794-52mjg          Container started
+35m         Normal    Created             pod/user-service-59d5d7f794-87hw4          Container created
+35m         Normal    Created             pod/user-service-59d5d7f794-52mjg          Container created
+35m         Warning   Unhealthy           pod/user-service-59d5d7f794-t5xw7          Readiness probe failed: Get "http://10.1.0.147:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+35m         Warning   Unhealthy           pod/user-service-59d5d7f794-2mpxn          Readiness probe failed: Get "http://10.1.0.138:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+35m         Warning   Unhealthy           pod/user-service-59d5d7f794-87hw4          Readiness probe failed: Get "http://10.1.0.148:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+34m         Warning   Unhealthy           pod/user-service-59d5d7f794-qm6c7          Readiness probe failed: Get "http://10.1.0.146:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+34m         Warning   Unhealthy           pod/user-service-59d5d7f794-52mjg          Readiness probe failed: Get "http://10.1.0.149:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+29m         Normal    Killing             pod/user-service-59d5d7f794-qm6c7          Stopping container user-service
+29m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-qm6c7
+27m         Normal    Killing             pod/user-service-59d5d7f794-52mjg          Stopping container user-service
+27m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-52mjg
+25m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-ld2xh
+25m         Normal    Killing             pod/user-service-59d5d7f794-ld2xh          Stopping container user-service
+23m         Normal    Killing             pod/user-service-59d5d7f794-87hw4          Stopping container user-service
+23m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-87hw4
+21m         Normal    Killing             pod/user-service-59d5d7f794-2mpxn          Stopping container user-service
+21m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-2mpxn
+19m         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-t5xw7
+19m         Normal    ScalingReplicaSet   deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 3 to 2
+19m         Normal    SuccessfulRescale   horizontalpodautoscaler/user-service-hpa   New size: 2; reason: All metrics below target
+19m         Normal    Killing             pod/user-service-59d5d7f794-t5xw7          Stopping container user-service
+16m         Normal    Scheduled           pod/user-service-59d5d7f794-lxfv6          Successfully assigned online-teach-micro/user-service-59d5d7f794-lxfv6 to docker-desktop
+16m         Normal    SuccessfulRescale   horizontalpodautoscaler/user-service-hpa   New size: 4; reason: cpu resource utilization (percentage of request) above target
+16m         Normal    Scheduled           pod/user-service-59d5d7f794-pww8q          Successfully assigned online-teach-micro/user-service-59d5d7f794-pww8q to docker-desktop
+16m         Normal    ScalingReplicaSet   deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 2 to 4
+16m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-pww8q
+16m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-lxfv6
+16m         Normal    Pulled              pod/user-service-59d5d7f794-lxfv6          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+16m         Normal    Started             pod/user-service-59d5d7f794-lxfv6          Container started
+16m         Normal    Pulled              pod/user-service-59d5d7f794-pww8q          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+16m         Normal    Started             pod/user-service-59d5d7f794-pww8q          Container started
+16m         Normal    Created             pod/user-service-59d5d7f794-pww8q          Container created
+16m         Normal    Created             pod/user-service-59d5d7f794-lxfv6          Container created
+16m         Warning   Unhealthy           pod/user-service-59d5d7f794-s99kg          Liveness probe failed: Get "http://10.1.0.145:8000/api/live/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+15m         Normal    SuccessfulRescale   horizontalpodautoscaler/user-service-hpa   New size: 6; reason: cpu resource utilization (percentage of request) above target
+15m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-b4rqx
+15m         Normal    Scheduled           pod/user-service-59d5d7f794-pjjdn          Successfully assigned online-teach-micro/user-service-59d5d7f794-pjjdn to docker-desktop
+15m         Normal    ScalingReplicaSet   deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 4 to 6
+15m         Normal    Scheduled           pod/user-service-59d5d7f794-b4rqx          Successfully assigned online-teach-micro/user-service-59d5d7f794-b4rqx to docker-desktop
+15m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-pjjdn
+15m         Normal    Pulled              pod/user-service-59d5d7f794-pjjdn          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+15m         Normal    Pulled              pod/user-service-59d5d7f794-b4rqx          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+15m         Normal    Created             pod/user-service-59d5d7f794-b4rqx          Container created
+15m         Normal    Started             pod/user-service-59d5d7f794-b4rqx          Container started
+15m         Normal    Created             pod/user-service-59d5d7f794-pjjdn          Container created
+15m         Normal    Started             pod/user-service-59d5d7f794-pjjdn          Container started
+15m         Warning   Unhealthy           pod/user-service-59d5d7f794-pm2xc          Readiness probe failed: Get "http://10.1.0.140:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+14m         Normal    ScalingReplicaSet   deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 6 to 8
+14m         Normal    Scheduled           pod/user-service-59d5d7f794-2mk52          Successfully assigned online-teach-micro/user-service-59d5d7f794-2mk52 to docker-desktop
+14m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-qqtx7
+14m         Normal    SuccessfulCreate    replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-2mk52
+14m         Normal    Scheduled           pod/user-service-59d5d7f794-qqtx7          Successfully assigned online-teach-micro/user-service-59d5d7f794-qqtx7 to docker-desktop
+14m         Normal    SuccessfulRescale   horizontalpodautoscaler/user-service-hpa   New size: 8; reason: cpu resource utilization (percentage of request) above target
+14m         Normal    Pulled              pod/user-service-59d5d7f794-qqtx7          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+14m         Normal    Created             pod/user-service-59d5d7f794-qqtx7          Container created
+14m         Normal    Pulled              pod/user-service-59d5d7f794-2mk52          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+14m         Normal    Created             pod/user-service-59d5d7f794-2mk52          Container created
+14m         Normal    Started             pod/user-service-59d5d7f794-qqtx7          Container started
+14m         Normal    Started             pod/user-service-59d5d7f794-2mk52          Container started
+14m         Warning   Unhealthy           pod/user-service-59d5d7f794-s99kg          Readiness probe failed: Get "http://10.1.0.145:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy           pod/user-service-59d5d7f794-qqtx7          Readiness probe failed: Get "http://10.1.0.154:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy           pod/user-service-59d5d7f794-2mk52          Readiness probe failed: Get "http://10.1.0.155:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy           pod/user-service-59d5d7f794-pww8q          Readiness probe failed: Get "http://10.1.0.151:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy           pod/user-service-59d5d7f794-b4rqx          Readiness probe failed: Get "http://10.1.0.153:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy           pod/user-service-59d5d7f794-lxfv6          Readiness probe failed: Get "http://10.1.0.150:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy           pod/user-service-59d5d7f794-pjjdn          Readiness probe failed: Get "http://10.1.0.152:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+8m42s       Normal    Killing             pod/user-service-59d5d7f794-qqtx7          Stopping container user-service
+8m42s       Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-qqtx7
+8m42s       Normal    ScalingReplicaSet   deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 8 to 7
+8m42s       Normal    SuccessfulRescale   horizontalpodautoscaler/user-service-hpa   New size: 7; reason: All metrics below target
+6m42s       Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-2mk52
+6m42s       Normal    Killing             pod/user-service-59d5d7f794-2mk52          Stopping container user-service
+6m42s       Normal    SuccessfulRescale   horizontalpodautoscaler/user-service-hpa   New size: 6; reason: All metrics below target
+6m42s       Normal    ScalingReplicaSet   deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 7 to 6
+4m42s       Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-b4rqx
+4m42s       Normal    Killing             pod/user-service-59d5d7f794-b4rqx          Stopping container user-service
+4m42s       Normal    SuccessfulRescale   horizontalpodautoscaler/user-service-hpa   New size: 5; reason: All metrics below target
+4m42s       Normal    ScalingReplicaSet   deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 6 to 5
+2m42s       Normal    SuccessfulRescale   horizontalpodautoscaler/user-service-hpa   New size: 4; reason: All metrics below target
+2m42s       Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-lxfv6
+2m42s       Normal    ScalingReplicaSet   deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 5 to 4
+2m42s       Normal    Killing             pod/user-service-59d5d7f794-lxfv6          Stopping container user-service
+42s         Normal    SuccessfulRescale   horizontalpodautoscaler/user-service-hpa   New size: 3; reason: All metrics below target
+42s         Normal    SuccessfulDelete    replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-pjjdn
+42s         Normal    Killing             pod/user-service-59d5d7f794-pjjdn          Stopping container user-service
+42s         Normal    ScalingReplicaSet   deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 4 to 3

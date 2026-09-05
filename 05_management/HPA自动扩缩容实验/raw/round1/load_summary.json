@@ -1,0 +1,28 @@
+{
+  "label": "round1-high",
+  "url": "http://localhost:30081/api/auth/token/",
+  "concurrency": 12,
+  "planned_duration_s": 240.0,
+  "actual_duration_s": 241.946,
+  "start_epoch": 1788578926.5747693,
+  "end_epoch": 1788579168.5209627,
+  "start_iso": "2026-09-05T11:28:46.574769+08:00",
+  "total_requests": 1785,
+  "success_200": 1785,
+  "http_errors": 0,
+  "client_errors": 0,
+  "error_rate_pct": 0.0,
+  "throughput_rps": 7.38,
+  "latency_ms": {
+    "avg": 1618.23,
+    "p50": 1119.06,
+    "p90": 3380.26,
+    "p95": 4691.48,
+    "p99": 5952.91,
+    "max": 6515.25
+  },
+  "latency_ms_all_requests": {
+    "avg": 1618.23,
+    "p95": 4691.48
+  }
+}

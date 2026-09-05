@@ -1,0 +1,120 @@
+21h         Normal    Scheduled               pod/user-service-59d5d7f794-gfnsw          Successfully assigned online-teach-micro/user-service-59d5d7f794-gfnsw to docker-desktop
+21h         Normal    Scheduled               pod/user-service-59d5d7f794-rfzwz          Successfully assigned online-teach-micro/user-service-59d5d7f794-rfzwz to docker-desktop
+21h         Normal    ScalingReplicaSet       deployment/mysql                           Scaled up replica set mysql-7784446f5b from 0 to 1
+21h         Normal    ScalingReplicaSet       deployment/course-service                  Scaled up replica set course-service-d96c86755 from 0 to 1
+21h         Normal    ScalingReplicaSet       deployment/assignment-service              Scaled up replica set assignment-service-7786d8c5b7 from 0 to 1
+21h         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-rfzwz
+21h         Normal    Pulled                  pod/user-service-59d5d7f794-rfzwz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+21h         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-gfnsw
+21h         Normal    ScalingReplicaSet       deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 0 to 2
+21h         Normal    ScalingReplicaSet       deployment/gateway                         Scaled up replica set gateway-67579f5847 from 0 to 1
+21h         Normal    Created                 pod/user-service-59d5d7f794-rfzwz          Container created
+21h         Normal    Started                 pod/user-service-59d5d7f794-rfzwz          Container started
+21h         Normal    ScalingReplicaSet       deployment/frontend                        Scaled up replica set frontend-86c7d7d6d4 from 0 to 1
+21h         Warning   BackOff                 pod/user-service-59d5d7f794-gfnsw          Back-off restarting failed container user-service in pod user-service-59d5d7f794-gfnsw_online-teach-micro(d06bb576-b945-40cb-8375-21a3cc9ca069)
+21h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.89:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+21h         Normal    Created                 pod/user-service-59d5d7f794-gfnsw          Container created
+21h         Normal    Started                 pod/user-service-59d5d7f794-gfnsw          Container started
+21h         Normal    Pulled                  pod/user-service-59d5d7f794-gfnsw          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+21h         Normal    SandboxChanged          pod/user-service-59d5d7f794-rfzwz          Pod sandbox changed, it will be killed and re-created.
+21h         Normal    SandboxChanged          pod/user-service-59d5d7f794-gfnsw          Pod sandbox changed, it will be killed and re-created.
+21h         Normal    Created                 pod/user-service-59d5d7f794-rfzwz          Container created
+21h         Normal    Started                 pod/user-service-59d5d7f794-rfzwz          Container started
+21h         Normal    Pulled                  pod/user-service-59d5d7f794-rfzwz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+21h         Normal    Started                 pod/user-service-59d5d7f794-gfnsw          Container started
+21h         Normal    Created                 pod/user-service-59d5d7f794-gfnsw          Container created
+21h         Normal    Pulled                  pod/user-service-59d5d7f794-gfnsw          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+21h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.102:8000/api/ready/": dial tcp 10.1.0.102:8000: connect: connection refused
+21h         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Readiness probe failed: Get "http://10.1.0.100:8000/api/ready/": dial tcp 10.1.0.100:8000: connect: connection refused
+21h         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Liveness probe failed: Get "http://10.1.0.100:8000/api/live/": dial tcp 10.1.0.100:8000: connect: connection refused
+21h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Liveness probe failed: Get "http://10.1.0.102:8000/api/live/": dial tcp 10.1.0.102:8000: connect: connection refused
+20h         Normal    SandboxChanged          pod/user-service-59d5d7f794-gfnsw          Pod sandbox changed, it will be killed and re-created.
+20h         Normal    SandboxChanged          pod/user-service-59d5d7f794-rfzwz          Pod sandbox changed, it will be killed and re-created.
+20h         Normal    Created                 pod/user-service-59d5d7f794-rfzwz          Container created
+20h         Normal    Created                 pod/user-service-59d5d7f794-gfnsw          Container created
+20h         Normal    Pulled                  pod/user-service-59d5d7f794-rfzwz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+20h         Normal    Pulled                  pod/user-service-59d5d7f794-gfnsw          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+20h         Normal    Started                 pod/user-service-59d5d7f794-gfnsw          Container started
+20h         Normal    Started                 pod/user-service-59d5d7f794-rfzwz          Container started
+20h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Liveness probe failed: Get "http://10.1.0.121:8000/api/live/": dial tcp 10.1.0.121:8000: connect: connection refused
+20h         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Readiness probe failed: Get "http://10.1.0.120:8000/api/ready/": dial tcp 10.1.0.120:8000: connect: connection refused
+20h         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Liveness probe failed: Get "http://10.1.0.120:8000/api/live/": dial tcp 10.1.0.120:8000: connect: connection refused
+20h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.121:8000/api/ready/": dial tcp 10.1.0.121:8000: connect: connection refused
+36m         Normal    SandboxChanged          pod/user-service-59d5d7f794-gfnsw          Pod sandbox changed, it will be killed and re-created.
+36m         Normal    SandboxChanged          pod/user-service-59d5d7f794-rfzwz          Pod sandbox changed, it will be killed and re-created.
+36m         Normal    Created                 pod/user-service-59d5d7f794-rfzwz          Container created
+36m         Normal    Started                 pod/user-service-59d5d7f794-rfzwz          Container started
+36m         Normal    Pulled                  pod/user-service-59d5d7f794-rfzwz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+36m         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.129:8000/api/ready/": dial tcp 10.1.0.129:8000: connect: connection refused
+36m         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Liveness probe failed: Get "http://10.1.0.129:8000/api/live/": dial tcp 10.1.0.129:8000: connect: connection refused
+36m         Normal    Killing                 pod/user-service-59d5d7f794-gfnsw          Container user-service failed liveness probe, will be restarted
+36m         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Liveness probe failed: Get "http://10.1.0.132:8000/api/live/": dial tcp 10.1.0.132:8000: connect: connection refused
+36m         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Readiness probe failed: Get "http://10.1.0.132:8000/api/ready/": dial tcp 10.1.0.132:8000: connect: connection refused
+35m         Normal    Started                 pod/user-service-59d5d7f794-gfnsw          Container started
+35m         Normal    Pulled                  pod/user-service-59d5d7f794-gfnsw          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+35m         Normal    Created                 pod/user-service-59d5d7f794-gfnsw          Container created
+16m         Normal    Scheduled               pod/user-service-59d5d7f794-2mpxn          Successfully assigned online-teach-micro/user-service-59d5d7f794-2mpxn to docker-desktop
+16m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-2mpxn
+16m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-mm7cz
+16m         Normal    Scheduled               pod/user-service-59d5d7f794-mm7cz          Successfully assigned online-teach-micro/user-service-59d5d7f794-mm7cz to docker-desktop
+16m         Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 4; reason: cpu resource utilization (percentage of request) above target
+16m         Normal    ScalingReplicaSet       deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 2 to 4
+16m         Normal    Created                 pod/user-service-59d5d7f794-mm7cz          Container created
+16m         Normal    Started                 pod/user-service-59d5d7f794-mm7cz          Container started
+16m         Normal    Pulled                  pod/user-service-59d5d7f794-2mpxn          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+16m         Normal    Started                 pod/user-service-59d5d7f794-2mpxn          Container started
+16m         Normal    Pulled                  pod/user-service-59d5d7f794-mm7cz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+16m         Normal    Created                 pod/user-service-59d5d7f794-2mpxn          Container created
+16m         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Liveness probe failed: Get "http://10.1.0.132:8000/api/live/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+15m         Normal    ScalingReplicaSet       deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 4 to 6
+15m         Normal    Scheduled               pod/user-service-59d5d7f794-q7ncd          Successfully assigned online-teach-micro/user-service-59d5d7f794-q7ncd to docker-desktop
+15m         Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 6; reason: cpu resource utilization (percentage of request) above target
+15m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-pm2xc
+15m         Normal    Scheduled               pod/user-service-59d5d7f794-pm2xc          Successfully assigned online-teach-micro/user-service-59d5d7f794-pm2xc to docker-desktop
+15m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-q7ncd
+15m         Normal    Created                 pod/user-service-59d5d7f794-pm2xc          Container created
+15m         Normal    Pulled                  pod/user-service-59d5d7f794-pm2xc          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+15m         Normal    Started                 pod/user-service-59d5d7f794-pm2xc          Container started
+15m         Normal    Pulled                  pod/user-service-59d5d7f794-q7ncd          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+15m         Normal    Created                 pod/user-service-59d5d7f794-q7ncd          Container created
+15m         Normal    Started                 pod/user-service-59d5d7f794-q7ncd          Container started
+14m         Warning   Unhealthy               pod/user-service-59d5d7f794-mm7cz          Readiness probe failed: Get "http://10.1.0.139:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+14m         Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 8; reason: cpu resource utilization (percentage of request) above target
+14m         Normal    Scheduled               pod/user-service-59d5d7f794-rvmll          Successfully assigned online-teach-micro/user-service-59d5d7f794-rvmll to docker-desktop
+14m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-cnn64
+14m         Normal    ScalingReplicaSet       deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 6 to 8
+14m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-rvmll
+14m         Normal    Scheduled               pod/user-service-59d5d7f794-cnn64          Successfully assigned online-teach-micro/user-service-59d5d7f794-cnn64 to docker-desktop
+14m         Normal    Pulled                  pod/user-service-59d5d7f794-cnn64          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+14m         Normal    Started                 pod/user-service-59d5d7f794-cnn64          Container started
+14m         Normal    Pulled                  pod/user-service-59d5d7f794-rvmll          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+14m         Normal    Created                 pod/user-service-59d5d7f794-rvmll          Container created
+14m         Normal    Started                 pod/user-service-59d5d7f794-rvmll          Container started
+14m         Normal    Created                 pod/user-service-59d5d7f794-cnn64          Container created
+14m         Warning   Unhealthy               pod/user-service-59d5d7f794-pm2xc          Readiness probe failed: Get "http://10.1.0.140:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+14m         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.129:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy               pod/user-service-59d5d7f794-rvmll          Readiness probe failed: Get "http://10.1.0.142:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy               pod/user-service-59d5d7f794-2mpxn          Readiness probe failed: Get "http://10.1.0.138:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy               pod/user-service-59d5d7f794-cnn64          Readiness probe failed: Get "http://10.1.0.143:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Readiness probe failed: Get "http://10.1.0.132:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+8m42s       Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 8 to 7
+8m42s       Normal    Killing                 pod/user-service-59d5d7f794-cnn64          Stopping container user-service
+8m42s       Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-cnn64
+8m42s       Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 7; reason: All metrics below target
+6m42s       Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-rvmll
+6m42s       Normal    Killing                 pod/user-service-59d5d7f794-rvmll          Stopping container user-service
+6m42s       Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 6; reason: All metrics below target
+6m42s       Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 7 to 6
+4m42s       Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-mm7cz
+4m42s       Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 5; reason: All metrics below target
+4m42s       Normal    Killing                 pod/user-service-59d5d7f794-mm7cz          Stopping container user-service
+4m42s       Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 6 to 5
+2m42s       Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 4; reason: All metrics below target
+2m42s       Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-rfzwz
+2m42s       Normal    Killing                 pod/user-service-59d5d7f794-rfzwz          Stopping container user-service
+2m42s       Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 5 to 4
+42s         Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 3; reason: All metrics below target
+42s         Normal    Killing                 pod/user-service-59d5d7f794-q7ncd          Stopping container user-service
+42s         Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-q7ncd
+42s         Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 4 to 3
+40s         Warning   Unhealthy               pod/user-service-59d5d7f794-q7ncd          Readiness probe failed: Get "http://10.1.0.141:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)

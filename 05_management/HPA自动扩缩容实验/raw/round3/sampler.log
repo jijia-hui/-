@@ -1,0 +1,10 @@
+[sampler] sample_pods 采集失败: timeout
+[sampler] sample_hpa 采集失败: timeout
+[sampler] sample_hpa 采集失败: timeout
+[sampler] sample_top 采集失败: timeout
+[sampler] sample_pods 采集失败: timeout
+[sampler] sample_pods 采集失败: timeout
+[sampler] sample_hpa 采集失败: timeout
+[sampler] sample_pods 采集失败: timeout
+[sampler] sample_pods 采集失败: timeout
+[sampler] 完成，共 60 个采样点 -> D:/online_teaching_platform/05_management/HPA自动扩缩容实验/raw/round3/metrics_timeline.csv

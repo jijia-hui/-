@@ -1,0 +1,7 @@
+NAME               REFERENCE                 TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+user-service-hpa   Deployment/user-service   cpu: 2%/70%   2         8         4          21h
+
+NAME                            READY   STATUS    RESTARTS      AGE   IP           NODE             NOMINATED NODE   READINESS GATES
+user-service-59d5d7f794-2mpxn   1/1     Running   0             16m   10.1.0.138   docker-desktop   <none>           <none>
+user-service-59d5d7f794-gfnsw   1/1     Running   6 (35m ago)   21h   10.1.0.132   docker-desktop   <none>           <none>
+user-service-59d5d7f794-pm2xc   1/1     Running   0             15m   10.1.0.140   docker-desktop   <none>           <none>

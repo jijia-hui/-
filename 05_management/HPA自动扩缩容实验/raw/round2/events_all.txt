@@ -1,0 +1,277 @@
+LAST SEEN   TYPE      REASON                  OBJECT                                     MESSAGE
+22h         Normal    Scheduled               pod/user-service-59d5d7f794-gfnsw          Successfully assigned online-teach-micro/user-service-59d5d7f794-gfnsw to docker-desktop
+22h         Normal    Scheduled               pod/mysql-7784446f5b-c9pgq                 Successfully assigned online-teach-micro/mysql-7784446f5b-c9pgq to docker-desktop
+22h         Normal    Scheduled               pod/user-service-59d5d7f794-rfzwz          Successfully assigned online-teach-micro/user-service-59d5d7f794-rfzwz to docker-desktop
+22h         Normal    Scheduled               pod/course-service-d96c86755-s6zbs         Successfully assigned online-teach-micro/course-service-d96c86755-s6zbs to docker-desktop
+22h         Normal    Scheduled               pod/frontend-86c7d7d6d4-222b5              Successfully assigned online-teach-micro/frontend-86c7d7d6d4-222b5 to docker-desktop
+22h         Normal    Scheduled               pod/assignment-service-7786d8c5b7-8fml8    Successfully assigned online-teach-micro/assignment-service-7786d8c5b7-8fml8 to docker-desktop
+22h         Normal    Scheduled               pod/gateway-67579f5847-6gznm               Successfully assigned online-teach-micro/gateway-67579f5847-6gznm to docker-desktop
+22h         Normal    Created                 pod/mysql-7784446f5b-c9pgq                 Container created
+22h         Normal    ExternalProvisioning    persistentvolumeclaim/mysql-pvc            Waiting for a volume to be created either by the external provisioner 'docker.io/hostpath' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+22h         Normal    Provisioning            persistentvolumeclaim/mysql-pvc            External provisioner is provisioning volume for claim "online-teach-micro/mysql-pvc"
+22h         Normal    ProvisioningSucceeded   persistentvolumeclaim/mysql-pvc            Successfully provisioned volume pvc-3c19531d-2244-46b4-8de1-5586eab7ad2a
+22h         Normal    ScalingReplicaSet       deployment/mysql                           Scaled up replica set mysql-7784446f5b from 0 to 1
+22h         Normal    SuccessfulCreate        replicaset/mysql-7784446f5b                Created pod: mysql-7784446f5b-c9pgq
+22h         Normal    Pulled                  pod/mysql-7784446f5b-c9pgq                 Container image "mysql:8.0" already present on machine and can be accessed by the pod
+22h         Normal    Started                 pod/mysql-7784446f5b-c9pgq                 Container started
+22h         Normal    ScalingReplicaSet       deployment/course-service                  Scaled up replica set course-service-d96c86755 from 0 to 1
+22h         Normal    SuccessfulCreate        replicaset/course-service-d96c86755        Created pod: course-service-d96c86755-s6zbs
+22h         Normal    Pulled                  pod/course-service-d96c86755-s6zbs         Container image "ghcr.io/jijia-hui/otp-course-service:latest" already present on machine and can be accessed by the pod
+22h         Normal    Started                 pod/course-service-d96c86755-s6zbs         Container started
+22h         Normal    Created                 pod/course-service-d96c86755-s6zbs         Container created
+22h         Normal    SuccessfulCreate        replicaset/assignment-service-7786d8c5b7   Created pod: assignment-service-7786d8c5b7-8fml8
+22h         Normal    Provisioning            persistentvolumeclaim/media-pvc            External provisioner is provisioning volume for claim "online-teach-micro/media-pvc"
+22h         Normal    ScalingReplicaSet       deployment/assignment-service              Scaled up replica set assignment-service-7786d8c5b7 from 0 to 1
+22h         Normal    Pulled                  pod/user-service-59d5d7f794-rfzwz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+22h         Normal    ExternalProvisioning    persistentvolumeclaim/media-pvc            Waiting for a volume to be created either by the external provisioner 'docker.io/hostpath' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+22h         Normal    ProvisioningSucceeded   persistentvolumeclaim/media-pvc            Successfully provisioned volume pvc-578fcecb-1f32-4fef-9781-aa45cff375a7
+22h         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-gfnsw
+22h         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-rfzwz
+22h         Normal    ScalingReplicaSet       deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 0 to 2
+22h         Normal    Started                 pod/assignment-service-7786d8c5b7-8fml8    Container started
+22h         Normal    Started                 pod/user-service-59d5d7f794-rfzwz          Container started
+22h         Normal    Created                 pod/user-service-59d5d7f794-rfzwz          Container created
+22h         Normal    ScalingReplicaSet       deployment/frontend                        Scaled up replica set frontend-86c7d7d6d4 from 0 to 1
+22h         Normal    SuccessfulCreate        replicaset/frontend-86c7d7d6d4             Created pod: frontend-86c7d7d6d4-222b5
+22h         Normal    Pulled                  pod/frontend-86c7d7d6d4-222b5              Container image "ghcr.io/jijia-hui/online-teaching-platform-frontend:latest" already present on machine and can be accessed by the pod
+22h         Normal    Created                 pod/assignment-service-7786d8c5b7-8fml8    Container created
+22h         Normal    Pulled                  pod/assignment-service-7786d8c5b7-8fml8    Container image "ghcr.io/jijia-hui/otp-assignment-service:latest" already present on machine and can be accessed by the pod
+22h         Normal    Created                 pod/frontend-86c7d7d6d4-222b5              Container created
+22h         Normal    ScalingReplicaSet       deployment/gateway                         Scaled up replica set gateway-67579f5847 from 0 to 1
+22h         Normal    SuccessfulCreate        replicaset/gateway-67579f5847              Created pod: gateway-67579f5847-6gznm
+22h         Normal    Pulling                 pod/gateway-67579f5847-6gznm               Pulling image "nginx:1.27-alpine"
+22h         Normal    Started                 pod/frontend-86c7d7d6d4-222b5              Container started
+22h         Normal    Pulled                  pod/gateway-67579f5847-6gznm               Successfully pulled image "nginx:1.27-alpine" in 1.9s (1.9s including waiting). Image size: 48239342 bytes.
+22h         Normal    Started                 pod/gateway-67579f5847-6gznm               Container started
+22h         Normal    Created                 pod/gateway-67579f5847-6gznm               Container created
+22h         Warning   BackOff                 pod/user-service-59d5d7f794-gfnsw          Back-off restarting failed container user-service in pod user-service-59d5d7f794-gfnsw_online-teach-micro(d06bb576-b945-40cb-8375-21a3cc9ca069)
+22h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.89:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+22h         Normal    Pulled                  pod/user-service-59d5d7f794-gfnsw          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+22h         Normal    Created                 pod/user-service-59d5d7f794-gfnsw          Container created
+22h         Normal    Started                 pod/user-service-59d5d7f794-gfnsw          Container started
+21h         Normal    SandboxChanged          pod/frontend-86c7d7d6d4-222b5              Pod sandbox changed, it will be killed and re-created.
+21h         Normal    SandboxChanged          pod/mysql-7784446f5b-c9pgq                 Pod sandbox changed, it will be killed and re-created.
+21h         Normal    SandboxChanged          pod/assignment-service-7786d8c5b7-8fml8    Pod sandbox changed, it will be killed and re-created.
+21h         Normal    SandboxChanged          pod/course-service-d96c86755-s6zbs         Pod sandbox changed, it will be killed and re-created.
+21h         Normal    SandboxChanged          pod/user-service-59d5d7f794-rfzwz          Pod sandbox changed, it will be killed and re-created.
+21h         Normal    SandboxChanged          pod/gateway-67579f5847-6gznm               Pod sandbox changed, it will be killed and re-created.
+21h         Normal    SandboxChanged          pod/user-service-59d5d7f794-gfnsw          Pod sandbox changed, it will be killed and re-created.
+21h         Normal    Created                 pod/assignment-service-7786d8c5b7-8fml8    Container created
+21h         Normal    Started                 pod/course-service-d96c86755-s6zbs         Container started
+21h         Normal    Pulled                  pod/user-service-59d5d7f794-gfnsw          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+21h         Normal    Started                 pod/assignment-service-7786d8c5b7-8fml8    Container started
+21h         Normal    Created                 pod/user-service-59d5d7f794-rfzwz          Container created
+21h         Normal    Started                 pod/user-service-59d5d7f794-rfzwz          Container started
+21h         Normal    Pulled                  pod/course-service-d96c86755-s6zbs         Container image "ghcr.io/jijia-hui/otp-course-service:latest" already present on machine and can be accessed by the pod
+21h         Normal    Created                 pod/course-service-d96c86755-s6zbs         Container created
+21h         Normal    Pulled                  pod/user-service-59d5d7f794-rfzwz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+21h         Normal    Started                 pod/user-service-59d5d7f794-gfnsw          Container started
+21h         Normal    Created                 pod/user-service-59d5d7f794-gfnsw          Container created
+21h         Normal    Pulled                  pod/mysql-7784446f5b-c9pgq                 Container image "mysql:8.0" already present on machine and can be accessed by the pod
+21h         Normal    Pulled                  pod/assignment-service-7786d8c5b7-8fml8    Container image "ghcr.io/jijia-hui/otp-assignment-service:latest" already present on machine and can be accessed by the pod
+21h         Normal    Started                 pod/mysql-7784446f5b-c9pgq                 Container started
+21h         Normal    Created                 pod/mysql-7784446f5b-c9pgq                 Container created
+21h         Warning   BackOff                 pod/frontend-86c7d7d6d4-222b5              Back-off restarting failed container frontend in pod frontend-86c7d7d6d4-222b5_online-teach-micro(e16830cb-22c8-4d9f-aa9a-47d9021c1d8e)
+21h         Warning   Unhealthy               pod/assignment-service-7786d8c5b7-8fml8    Readiness probe failed: Get "http://10.1.0.98:8000/api/ready/": dial tcp 10.1.0.98:8000: connect: connection refused
+21h         Warning   Unhealthy               pod/course-service-d96c86755-s6zbs         Readiness probe failed: Get "http://10.1.0.105:8000/api/ready/": dial tcp 10.1.0.105:8000: connect: connection refused
+21h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.102:8000/api/ready/": dial tcp 10.1.0.102:8000: connect: connection refused
+21h         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Readiness probe failed: Get "http://10.1.0.100:8000/api/ready/": dial tcp 10.1.0.100:8000: connect: connection refused
+21h         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Liveness probe failed: Get "http://10.1.0.100:8000/api/live/": dial tcp 10.1.0.100:8000: connect: connection refused
+21h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Liveness probe failed: Get "http://10.1.0.102:8000/api/live/": dial tcp 10.1.0.102:8000: connect: connection refused
+21h         Warning   BackOff                 pod/gateway-67579f5847-6gznm               Back-off restarting failed container gateway in pod gateway-67579f5847-6gznm_online-teach-micro(b762919e-0335-4270-bbc0-417a17a88caa)
+21h         Normal    Pulled                  pod/frontend-86c7d7d6d4-222b5              Container image "ghcr.io/jijia-hui/online-teaching-platform-frontend:latest" already present on machine and can be accessed by the pod
+21h         Normal    Started                 pod/frontend-86c7d7d6d4-222b5              Container started
+21h         Normal    Created                 pod/frontend-86c7d7d6d4-222b5              Container created
+21h         Normal    Pulled                  pod/gateway-67579f5847-6gznm               Container image "nginx:1.27-alpine" already present on machine and can be accessed by the pod
+21h         Normal    Created                 pod/gateway-67579f5847-6gznm               Container created
+21h         Normal    Started                 pod/gateway-67579f5847-6gznm               Container started
+20h         Normal    SandboxChanged          pod/user-service-59d5d7f794-gfnsw          Pod sandbox changed, it will be killed and re-created.
+20h         Normal    SandboxChanged          pod/course-service-d96c86755-s6zbs         Pod sandbox changed, it will be killed and re-created.
+20h         Normal    SandboxChanged          pod/frontend-86c7d7d6d4-222b5              Pod sandbox changed, it will be killed and re-created.
+20h         Normal    SandboxChanged          pod/user-service-59d5d7f794-rfzwz          Pod sandbox changed, it will be killed and re-created.
+20h         Normal    SandboxChanged          pod/assignment-service-7786d8c5b7-8fml8    Pod sandbox changed, it will be killed and re-created.
+20h         Normal    SandboxChanged          pod/mysql-7784446f5b-c9pgq                 Pod sandbox changed, it will be killed and re-created.
+20h         Normal    SandboxChanged          pod/gateway-67579f5847-6gznm               Pod sandbox changed, it will be killed and re-created.
+20h         Normal    Pulled                  pod/assignment-service-7786d8c5b7-8fml8    Container image "ghcr.io/jijia-hui/otp-assignment-service:latest" already present on machine and can be accessed by the pod
+20h         Normal    Pulled                  pod/course-service-d96c86755-s6zbs         Container image "ghcr.io/jijia-hui/otp-course-service:latest" already present on machine and can be accessed by the pod
+20h         Normal    Created                 pod/mysql-7784446f5b-c9pgq                 Container created
+20h         Normal    Started                 pod/user-service-59d5d7f794-rfzwz          Container started
+20h         Normal    Pulled                  pod/mysql-7784446f5b-c9pgq                 Container image "mysql:8.0" already present on machine and can be accessed by the pod
+20h         Normal    Created                 pod/assignment-service-7786d8c5b7-8fml8    Container created
+20h         Normal    Started                 pod/mysql-7784446f5b-c9pgq                 Container started
+20h         Normal    Started                 pod/assignment-service-7786d8c5b7-8fml8    Container started
+20h         Normal    Created                 pod/course-service-d96c86755-s6zbs         Container created
+20h         Normal    Pulled                  pod/user-service-59d5d7f794-rfzwz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+20h         Normal    Created                 pod/user-service-59d5d7f794-rfzwz          Container created
+20h         Normal    Pulled                  pod/user-service-59d5d7f794-gfnsw          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+20h         Normal    Created                 pod/user-service-59d5d7f794-gfnsw          Container created
+20h         Normal    Started                 pod/user-service-59d5d7f794-gfnsw          Container started
+20h         Normal    Started                 pod/course-service-d96c86755-s6zbs         Container started
+20h         Warning   Unhealthy               pod/assignment-service-7786d8c5b7-8fml8    Readiness probe failed: Get "http://10.1.0.117:8000/api/ready/": dial tcp 10.1.0.117:8000: connect: connection refused
+20h         Warning   BackOff                 pod/gateway-67579f5847-6gznm               Back-off restarting failed container gateway in pod gateway-67579f5847-6gznm_online-teach-micro(b762919e-0335-4270-bbc0-417a17a88caa)
+20h         Warning   Unhealthy               pod/course-service-d96c86755-s6zbs         Readiness probe failed: Get "http://10.1.0.114:8000/api/ready/": dial tcp 10.1.0.114:8000: connect: connection refused
+20h         Warning   BackOff                 pod/frontend-86c7d7d6d4-222b5              Back-off restarting failed container frontend in pod frontend-86c7d7d6d4-222b5_online-teach-micro(e16830cb-22c8-4d9f-aa9a-47d9021c1d8e)
+20h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Liveness probe failed: Get "http://10.1.0.121:8000/api/live/": dial tcp 10.1.0.121:8000: connect: connection refused
+20h         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Readiness probe failed: Get "http://10.1.0.120:8000/api/ready/": dial tcp 10.1.0.120:8000: connect: connection refused
+20h         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Liveness probe failed: Get "http://10.1.0.120:8000/api/live/": dial tcp 10.1.0.120:8000: connect: connection refused
+20h         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.121:8000/api/ready/": dial tcp 10.1.0.121:8000: connect: connection refused
+20h         Normal    Pulled                  pod/gateway-67579f5847-6gznm               Container image "nginx:1.27-alpine" already present on machine and can be accessed by the pod
+20h         Normal    Created                 pod/gateway-67579f5847-6gznm               Container created
+20h         Normal    Started                 pod/gateway-67579f5847-6gznm               Container started
+20h         Normal    Pulled                  pod/frontend-86c7d7d6d4-222b5              Container image "ghcr.io/jijia-hui/online-teaching-platform-frontend:latest" already present on machine and can be accessed by the pod
+20h         Normal    Started                 pod/frontend-86c7d7d6d4-222b5              Container started
+20h         Normal    Created                 pod/frontend-86c7d7d6d4-222b5              Container created
+57m         Normal    SandboxChanged          pod/user-service-59d5d7f794-gfnsw          Pod sandbox changed, it will be killed and re-created.
+57m         Normal    SandboxChanged          pod/assignment-service-7786d8c5b7-8fml8    Pod sandbox changed, it will be killed and re-created.
+57m         Normal    SandboxChanged          pod/course-service-d96c86755-s6zbs         Pod sandbox changed, it will be killed and re-created.
+57m         Normal    SandboxChanged          pod/user-service-59d5d7f794-rfzwz          Pod sandbox changed, it will be killed and re-created.
+57m         Normal    SandboxChanged          pod/frontend-86c7d7d6d4-222b5              Pod sandbox changed, it will be killed and re-created.
+57m         Normal    SandboxChanged          pod/mysql-7784446f5b-c9pgq                 Pod sandbox changed, it will be killed and re-created.
+57m         Normal    SandboxChanged          pod/gateway-67579f5847-6gznm               Pod sandbox changed, it will be killed and re-created.
+57m         Normal    Created                 pod/assignment-service-7786d8c5b7-8fml8    Container created
+57m         Normal    Pulled                  pod/assignment-service-7786d8c5b7-8fml8    Container image "ghcr.io/jijia-hui/otp-assignment-service:latest" already present on machine and can be accessed by the pod
+57m         Normal    Created                 pod/user-service-59d5d7f794-rfzwz          Container created
+57m         Normal    Started                 pod/assignment-service-7786d8c5b7-8fml8    Container started
+57m         Normal    Started                 pod/mysql-7784446f5b-c9pgq                 Container started
+57m         Normal    Pulled                  pod/mysql-7784446f5b-c9pgq                 Container image "mysql:8.0" already present on machine and can be accessed by the pod
+57m         Normal    Pulled                  pod/user-service-59d5d7f794-rfzwz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+57m         Normal    Created                 pod/course-service-d96c86755-s6zbs         Container created
+57m         Normal    Started                 pod/user-service-59d5d7f794-rfzwz          Container started
+57m         Normal    Created                 pod/mysql-7784446f5b-c9pgq                 Container created
+57m         Normal    Pulled                  pod/course-service-d96c86755-s6zbs         Container image "ghcr.io/jijia-hui/otp-course-service:latest" already present on machine and can be accessed by the pod
+57m         Normal    Started                 pod/course-service-d96c86755-s6zbs         Container started
+57m         Warning   BackOff                 pod/gateway-67579f5847-6gznm               Back-off restarting failed container gateway in pod gateway-67579f5847-6gznm_online-teach-micro(b762919e-0335-4270-bbc0-417a17a88caa)
+57m         Warning   Unhealthy               pod/course-service-d96c86755-s6zbs         Readiness probe failed: Get "http://10.1.0.123:8000/api/ready/": dial tcp 10.1.0.123:8000: connect: connection refused
+57m         Warning   BackOff                 pod/frontend-86c7d7d6d4-222b5              Back-off restarting failed container frontend in pod frontend-86c7d7d6d4-222b5_online-teach-micro(e16830cb-22c8-4d9f-aa9a-47d9021c1d8e)
+57m         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.129:8000/api/ready/": dial tcp 10.1.0.129:8000: connect: connection refused
+56m         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Liveness probe failed: Get "http://10.1.0.129:8000/api/live/": dial tcp 10.1.0.129:8000: connect: connection refused
+56m         Warning   Unhealthy               pod/assignment-service-7786d8c5b7-8fml8    Readiness probe failed: Get "http://10.1.0.131:8000/api/ready/": dial tcp 10.1.0.131:8000: connect: connection refused
+56m         Normal    Killing                 pod/user-service-59d5d7f794-gfnsw          Container user-service failed liveness probe, will be restarted
+56m         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Liveness probe failed: Get "http://10.1.0.132:8000/api/live/": dial tcp 10.1.0.132:8000: connect: connection refused
+56m         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Readiness probe failed: Get "http://10.1.0.132:8000/api/ready/": dial tcp 10.1.0.132:8000: connect: connection refused
+56m         Normal    Pulled                  pod/frontend-86c7d7d6d4-222b5              Container image "ghcr.io/jijia-hui/online-teaching-platform-frontend:latest" already present on machine and can be accessed by the pod
+56m         Normal    Pulled                  pod/gateway-67579f5847-6gznm               Container image "nginx:1.27-alpine" already present on machine and can be accessed by the pod
+56m         Normal    Created                 pod/gateway-67579f5847-6gznm               Container created
+56m         Normal    Started                 pod/gateway-67579f5847-6gznm               Container started
+56m         Normal    Created                 pod/frontend-86c7d7d6d4-222b5              Container created
+56m         Normal    Started                 pod/frontend-86c7d7d6d4-222b5              Container started
+56m         Normal    Pulled                  pod/user-service-59d5d7f794-gfnsw          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+56m         Normal    Created                 pod/user-service-59d5d7f794-gfnsw          Container created
+56m         Normal    Started                 pod/user-service-59d5d7f794-gfnsw          Container started
+37m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-mm7cz
+37m         Normal    Scheduled               pod/user-service-59d5d7f794-2mpxn          Successfully assigned online-teach-micro/user-service-59d5d7f794-2mpxn to docker-desktop
+37m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-2mpxn
+37m         Normal    Scheduled               pod/user-service-59d5d7f794-mm7cz          Successfully assigned online-teach-micro/user-service-59d5d7f794-mm7cz to docker-desktop
+37m         Normal    Started                 pod/user-service-59d5d7f794-mm7cz          Container started
+37m         Normal    Pulled                  pod/user-service-59d5d7f794-2mpxn          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+37m         Normal    Created                 pod/user-service-59d5d7f794-2mpxn          Container created
+37m         Normal    Started                 pod/user-service-59d5d7f794-2mpxn          Container started
+37m         Normal    Pulled                  pod/user-service-59d5d7f794-mm7cz          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+37m         Normal    Created                 pod/user-service-59d5d7f794-mm7cz          Container created
+37m         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Liveness probe failed: Get "http://10.1.0.132:8000/api/live/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+36m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-q7ncd
+36m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-pm2xc
+36m         Normal    Scheduled               pod/user-service-59d5d7f794-q7ncd          Successfully assigned online-teach-micro/user-service-59d5d7f794-q7ncd to docker-desktop
+36m         Normal    Scheduled               pod/user-service-59d5d7f794-pm2xc          Successfully assigned online-teach-micro/user-service-59d5d7f794-pm2xc to docker-desktop
+36m         Normal    Created                 pod/user-service-59d5d7f794-q7ncd          Container created
+36m         Normal    Started                 pod/user-service-59d5d7f794-pm2xc          Container started
+36m         Normal    Pulled                  pod/user-service-59d5d7f794-pm2xc          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+36m         Normal    Pulled                  pod/user-service-59d5d7f794-q7ncd          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+36m         Normal    Started                 pod/user-service-59d5d7f794-q7ncd          Container started
+36m         Normal    Created                 pod/user-service-59d5d7f794-pm2xc          Container created
+35m         Warning   Unhealthy               pod/user-service-59d5d7f794-mm7cz          Readiness probe failed: Get "http://10.1.0.139:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+35m         Normal    Scheduled               pod/user-service-59d5d7f794-cnn64          Successfully assigned online-teach-micro/user-service-59d5d7f794-cnn64 to docker-desktop
+35m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-cnn64
+35m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-rvmll
+35m         Normal    Scheduled               pod/user-service-59d5d7f794-rvmll          Successfully assigned online-teach-micro/user-service-59d5d7f794-rvmll to docker-desktop
+35m         Normal    Started                 pod/user-service-59d5d7f794-cnn64          Container started
+35m         Normal    Pulled                  pod/user-service-59d5d7f794-cnn64          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+35m         Normal    Created                 pod/user-service-59d5d7f794-cnn64          Container created
+35m         Normal    Pulled                  pod/user-service-59d5d7f794-rvmll          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+35m         Normal    Created                 pod/user-service-59d5d7f794-rvmll          Container created
+35m         Normal    Started                 pod/user-service-59d5d7f794-rvmll          Container started
+35m         Warning   Unhealthy               pod/user-service-59d5d7f794-rfzwz          Readiness probe failed: Get "http://10.1.0.129:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+34m         Warning   Unhealthy               pod/user-service-59d5d7f794-rvmll          Readiness probe failed: Get "http://10.1.0.142:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+34m         Warning   Unhealthy               pod/user-service-59d5d7f794-cnn64          Readiness probe failed: Get "http://10.1.0.143:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+34m         Warning   Unhealthy               pod/user-service-59d5d7f794-gfnsw          Readiness probe failed: Get "http://10.1.0.132:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+29m         Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-cnn64
+29m         Normal    Killing                 pod/user-service-59d5d7f794-cnn64          Stopping container user-service
+27m         Normal    Killing                 pod/user-service-59d5d7f794-rvmll          Stopping container user-service
+27m         Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-rvmll
+25m         Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-mm7cz
+25m         Normal    Killing                 pod/user-service-59d5d7f794-mm7cz          Stopping container user-service
+23m         Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-rfzwz
+23m         Normal    Killing                 pod/user-service-59d5d7f794-rfzwz          Stopping container user-service
+21m         Normal    Killing                 pod/user-service-59d5d7f794-q7ncd          Stopping container user-service
+21m         Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-q7ncd
+21m         Warning   Unhealthy               pod/user-service-59d5d7f794-q7ncd          Readiness probe failed: Get "http://10.1.0.141:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+19m         Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 3 to 2
+19m         Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 2; reason: All metrics below target
+19m         Normal    Killing                 pod/user-service-59d5d7f794-gfnsw          Stopping container user-service
+19m         Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-gfnsw
+16m         Warning   Unhealthy               pod/user-service-59d5d7f794-pm2xc          Liveness probe failed: Get "http://10.1.0.140:8000/api/live/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+16m         Normal    ScalingReplicaSet       deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 2 to 4
+16m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-s99kg
+16m         Normal    Scheduled               pod/user-service-59d5d7f794-ld2xh          Successfully assigned online-teach-micro/user-service-59d5d7f794-ld2xh to docker-desktop
+16m         Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 4; reason: cpu resource utilization (percentage of request) above target
+16m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-ld2xh
+16m         Normal    Scheduled               pod/user-service-59d5d7f794-s99kg          Successfully assigned online-teach-micro/user-service-59d5d7f794-s99kg to docker-desktop
+16m         Normal    Pulled                  pod/user-service-59d5d7f794-ld2xh          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+16m         Normal    Pulled                  pod/user-service-59d5d7f794-s99kg          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+16m         Normal    Created                 pod/user-service-59d5d7f794-s99kg          Container created
+16m         Normal    Created                 pod/user-service-59d5d7f794-ld2xh          Container created
+16m         Normal    Started                 pod/user-service-59d5d7f794-ld2xh          Container started
+16m         Normal    Started                 pod/user-service-59d5d7f794-s99kg          Container started
+16m         Warning   Unhealthy               pod/user-service-59d5d7f794-2mpxn          Liveness probe failed: Get "http://10.1.0.138:8000/api/live/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+15m         Normal    ScalingReplicaSet       deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 4 to 6
+15m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-qm6c7
+15m         Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 6; reason: cpu resource utilization (percentage of request) above target
+15m         Normal    Scheduled               pod/user-service-59d5d7f794-t5xw7          Successfully assigned online-teach-micro/user-service-59d5d7f794-t5xw7 to docker-desktop
+15m         Normal    Scheduled               pod/user-service-59d5d7f794-qm6c7          Successfully assigned online-teach-micro/user-service-59d5d7f794-qm6c7 to docker-desktop
+15m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-t5xw7
+15m         Normal    Pulled                  pod/user-service-59d5d7f794-t5xw7          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+15m         Normal    Pulled                  pod/user-service-59d5d7f794-qm6c7          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+15m         Normal    Started                 pod/user-service-59d5d7f794-t5xw7          Container started
+15m         Normal    Created                 pod/user-service-59d5d7f794-t5xw7          Container created
+15m         Normal    Created                 pod/user-service-59d5d7f794-qm6c7          Container created
+15m         Normal    Started                 pod/user-service-59d5d7f794-qm6c7          Container started
+14m         Warning   Unhealthy               pod/user-service-59d5d7f794-ld2xh          Readiness probe failed: Get "http://10.1.0.144:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+14m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-87hw4
+14m         Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 8; reason: cpu resource utilization (percentage of request) above target
+14m         Normal    ScalingReplicaSet       deployment/user-service                    Scaled up replica set user-service-59d5d7f794 from 6 to 8
+14m         Normal    SuccessfulCreate        replicaset/user-service-59d5d7f794         Created pod: user-service-59d5d7f794-52mjg
+14m         Normal    Pulled                  pod/user-service-59d5d7f794-52mjg          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+14m         Normal    Scheduled               pod/user-service-59d5d7f794-52mjg          Successfully assigned online-teach-micro/user-service-59d5d7f794-52mjg to docker-desktop
+14m         Normal    Scheduled               pod/user-service-59d5d7f794-87hw4          Successfully assigned online-teach-micro/user-service-59d5d7f794-87hw4 to docker-desktop
+14m         Normal    Pulled                  pod/user-service-59d5d7f794-87hw4          Container image "ghcr.io/jijia-hui/otp-user-service:latest" already present on machine and can be accessed by the pod
+14m         Normal    Created                 pod/user-service-59d5d7f794-52mjg          Container created
+14m         Normal    Started                 pod/user-service-59d5d7f794-87hw4          Container started
+14m         Normal    Started                 pod/user-service-59d5d7f794-52mjg          Container started
+14m         Normal    Created                 pod/user-service-59d5d7f794-87hw4          Container created
+14m         Warning   Unhealthy               pod/user-service-59d5d7f794-pm2xc          Readiness probe failed: Get "http://10.1.0.140:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+14m         Warning   Unhealthy               pod/user-service-59d5d7f794-t5xw7          Readiness probe failed: Get "http://10.1.0.147:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+14m         Warning   Unhealthy               pod/user-service-59d5d7f794-2mpxn          Readiness probe failed: Get "http://10.1.0.138:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy               pod/user-service-59d5d7f794-s99kg          Readiness probe failed: Get "http://10.1.0.145:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy               pod/user-service-59d5d7f794-87hw4          Readiness probe failed: Get "http://10.1.0.148:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy               pod/user-service-59d5d7f794-qm6c7          Readiness probe failed: Get "http://10.1.0.146:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+13m         Warning   Unhealthy               pod/user-service-59d5d7f794-52mjg          Readiness probe failed: Get "http://10.1.0.149:8000/api/ready/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+8m26s       Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 8 to 7
+8m26s       Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-qm6c7
+8m26s       Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 7; reason: All metrics below target
+8m26s       Normal    Killing                 pod/user-service-59d5d7f794-qm6c7          Stopping container user-service
+6m26s       Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-52mjg
+6m26s       Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 6; reason: All metrics below target
+6m26s       Normal    Killing                 pod/user-service-59d5d7f794-52mjg          Stopping container user-service
+6m26s       Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 7 to 6
+4m26s       Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 6 to 5
+4m26s       Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 5; reason: All metrics below target
+4m26s       Normal    Killing                 pod/user-service-59d5d7f794-ld2xh          Stopping container user-service
+4m26s       Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-ld2xh
+2m26s       Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 4; reason: All metrics below target
+2m26s       Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-87hw4
+2m26s       Normal    Killing                 pod/user-service-59d5d7f794-87hw4          Stopping container user-service
+2m26s       Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 5 to 4
+26s         Normal    SuccessfulRescale       horizontalpodautoscaler/user-service-hpa   New size: 3; reason: All metrics below target
+26s         Normal    Killing                 pod/user-service-59d5d7f794-2mpxn          Stopping container user-service
+26s         Normal    ScalingReplicaSet       deployment/user-service                    Scaled down replica set user-service-59d5d7f794 from 4 to 3
+26s         Normal    SuccessfulDelete        replicaset/user-service-59d5d7f794         Deleted pod: user-service-59d5d7f794-2mpxn
