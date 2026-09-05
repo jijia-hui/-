@@ -1,0 +1,340 @@
+{
+  "experiment": "compose_fault_drill",
+  "timestamp_utc": "2026-09-05T06:03:18Z",
+  "base_url": "http://127.0.0.1:8080",
+  "course_id": 1,
+  "assignment_id": 2,
+  "scenarios": [
+    {
+      "step": "SC00_baseline_health",
+      "timestamp_utc": "2026-09-05T06:03:18.703403+00:00",
+      "probe": {
+        "ok": true,
+        "status": 200,
+        "elapsed_ms": 74.61,
+        "body": {
+          "status": "ok",
+          "service": "gateway",
+          "probes": {
+            "/api/health/user/": "user-service",
+            "/api/health/course/": "course-service",
+            "/api/health/assignment/": "assignment-service"
+          }
+        }
+      }
+    },
+    {
+      "step": "SC00_login",
+      "timestamp_utc": "2026-09-05T06:03:19.033687+00:00",
+      "success": true
+    },
+    {
+      "step": "SC00_courses_list",
+      "timestamp_utc": "2026-09-05T06:03:19.152208+00:00",
+      "probe": {
+        "ok": true,
+        "status": 200,
+        "elapsed_ms": 118.19,
+        "body": {
+          "count": 3,
+          "next": null,
+          "previous": null,
+          "results": [
+            {
+              "id": 1,
+              "name": "程序设计基础",
+              "code": "CS101",
+              "description": "Python 程序设计入门课程，涵盖语法、函数与面向对象。",
+              "teacher": 1,
+              "teacher_name": "demo_teacher",
+              "student_count": 0,
+              "students": [],
+              "is_enrolled": false,
+              "created_at": "2026-09-03T11:29:56.298193+08:00",
+              "updated_at": "2026-09-03T11:29:56.298217+08:00"
+            },
+            {
+              "id": 2,
+              "name": "操作系统",
+              "code": "OS101",
+              "description": "进程管理、内存管理、文件系统与并发控制。",
+              "teacher": 1,
+              "teacher_name": "demo_teacher",
+              "student_count": 0,
+              "students": [],
+              "is_enrolled": false,
+              "created_at": "2026-09-03T11:29:56.302686+08:00",
+              "updated_at": "2026-09-03T11:29:56.302701+08:00"
+            },
+            {
+              "id": 3,
+              "name": "计算机网络",
+              "code": "CN101",
+              "description": "TCP/IP 协议栈、网络编程与常见应用协议。",
+              "teacher": 1,
+              "teacher_name": "demo_teacher",
+              "student_count": 0,
+              "students": [],
+              "is_enrolled": false,
+              "created_at": "2026-09-03T11:29:56.307570+08:00",
+              "updated_at": "2026-09-03T11:29:56.307586+08:00"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "SC00_assignments_list",
+      "timestamp_utc": "2026-09-05T06:03:19.215724+00:00",
+      "probe": {
+        "ok": true,
+        "status": 200,
+        "elapsed_ms": 63.38,
+        "body": {
+          "count": 2,
+          "next": null,
+          "previous": null,
+          "results": [
+            {
+              "id": 2,
+              "course": 1,
+              "title": "程序设计基础作业2",
+              "description": "程序设计基础第二次作业：完成课程实验并提交实验报告。",
+              "deadline": "2026-09-17T11:30:02.001082+08:00",
+              "reference_file": null,
+              "reference_file_url": null,
+              "created_at": "2026-09-03T11:30:02.002997+08:00",
+              "updated_at": "2026-09-03T11:30:02.003003+08:00"
+            },
+            {
+              "id": 1,
+              "course": 1,
+              "title": "程序设计基础作业1",
+              "description": "程序设计基础第一次作业：完成课后习题第 1~5 题。",
+              "deadline": "2026-09-10T11:30:01.966153+08:00",
+              "reference_file": null,
+              "reference_file_url": null,
+              "created_at": "2026-09-03T11:30:01.996267+08:00",
+              "updated_at": "2026-09-03T11:30:01.996275+08:00"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "SC01_inject_stop_user_service",
+      "timestamp_utc": "2026-09-05T06:03:19.476531+00:00",
+      "compose": {
+        "command": "docker compose -f docker-compose.micro.prod.yml stop user-service",
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    {
+      "step": "SC01_courses_while_user_down",
+      "timestamp_utc": "2026-09-05T06:03:22.505984+00:00",
+      "probe": {
+        "ok": true,
+        "status": 200,
+        "elapsed_ms": 29.18,
+        "body": {
+          "count": 3,
+          "next": null,
+          "previous": null,
+          "results": [
+            {
+              "id": 1,
+              "name": "程序设计基础",
+              "code": "CS101",
+              "description": "Python 程序设计入门课程，涵盖语法、函数与面向对象。",
+              "teacher": 1,
+              "teacher_name": "demo_teacher",
+              "student_count": 0,
+              "students": [],
+              "is_enrolled": false,
+              "created_at": "2026-09-03T11:29:56.298193+08:00",
+              "updated_at": "2026-09-03T11:29:56.298217+08:00"
+            },
+            {
+              "id": 2,
+              "name": "操作系统",
+              "code": "OS101",
+              "description": "进程管理、内存管理、文件系统与并发控制。",
+              "teacher": 1,
+              "teacher_name": "demo_teacher",
+              "student_count": 0,
+              "students": [],
+              "is_enrolled": false,
+              "created_at": "2026-09-03T11:29:56.302686+08:00",
+              "updated_at": "2026-09-03T11:29:56.302701+08:00"
+            },
+            {
+              "id": 3,
+              "name": "计算机网络",
+              "code": "CN101",
+              "description": "TCP/IP 协议栈、网络编程与常见应用协议。",
+              "teacher": 1,
+              "teacher_name": "demo_teacher",
+              "student_count": 0,
+              "students": [],
+              "is_enrolled": false,
+              "created_at": "2026-09-03T11:29:56.307570+08:00",
+              "updated_at": "2026-09-03T11:29:56.307586+08:00"
+            }
+          ]
+        }
+      },
+      "expect": "HTTP 200，teacher_name 可为 null（降级）"
+    },
+    {
+      "step": "SC01_submit_while_user_down",
+      "timestamp_utc": "2026-09-05T06:03:22.569095+00:00",
+      "probe": {
+        "ok": false,
+        "status": 403,
+        "elapsed_ms": 62.95,
+        "body": {
+          "detail": "请先选课再提交作业"
+        }
+      },
+      "expect": "HTTP 503 或 401/403（fail-closed，不绕过校验）",
+      "assignment_id": 2
+    },
+    {
+      "step": "SC02_recover_start_user_service",
+      "timestamp_utc": "2026-09-05T06:03:22.824844+00:00",
+      "compose": {
+        "command": "docker compose -f docker-compose.micro.prod.yml start user-service",
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "service \"mysql\" has no container to start\n"
+      }
+    },
+    {
+      "step": "SC02_health_after_recover",
+      "timestamp_utc": "2026-09-05T06:03:30.827946+00:00",
+      "probe": {
+        "ok": true,
+        "status": 200,
+        "elapsed_ms": 2.55,
+        "body": {
+          "status": "ok",
+          "service": "gateway",
+          "probes": {
+            "/api/health/user/": "user-service",
+            "/api/health/course/": "course-service",
+            "/api/health/assignment/": "assignment-service"
+          }
+        }
+      }
+    },
+    {
+      "step": "SC02_courses_after_recover",
+      "timestamp_utc": "2026-09-05T06:03:30.846476+00:00",
+      "probe": {
+        "ok": true,
+        "status": 200,
+        "elapsed_ms": 18.42,
+        "body": {
+          "count": 3,
+          "next": null,
+          "previous": null,
+          "results": [
+            {
+              "id": 1,
+              "name": "程序设计基础",
+              "code": "CS101",
+              "description": "Python 程序设计入门课程，涵盖语法、函数与面向对象。",
+              "teacher": 1,
+              "teacher_name": "demo_teacher",
+              "student_count": 0,
+              "students": [],
+              "is_enrolled": false,
+              "created_at": "2026-09-03T11:29:56.298193+08:00",
+              "updated_at": "2026-09-03T11:29:56.298217+08:00"
+            },
+            {
+              "id": 2,
+              "name": "操作系统",
+              "code": "OS101",
+              "description": "进程管理、内存管理、文件系统与并发控制。",
+              "teacher": 1,
+              "teacher_name": "demo_teacher",
+              "student_count": 0,
+              "students": [],
+              "is_enrolled": false,
+              "created_at": "2026-09-03T11:29:56.302686+08:00",
+              "updated_at": "2026-09-03T11:29:56.302701+08:00"
+            },
+            {
+              "id": 3,
+              "name": "计算机网络",
+              "code": "CN101",
+              "description": "TCP/IP 协议栈、网络编程与常见应用协议。",
+              "teacher": 1,
+              "teacher_name": "demo_teacher",
+              "student_count": 0,
+              "students": [],
+              "is_enrolled": false,
+              "created_at": "2026-09-03T11:29:56.307570+08:00",
+              "updated_at": "2026-09-03T11:29:56.307586+08:00"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "SC03_inject_stop_course_service",
+      "timestamp_utc": "2026-09-05T06:03:31.059555+00:00",
+      "compose": {
+        "command": "docker compose -f docker-compose.micro.prod.yml stop course-service",
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    {
+      "step": "SC03_submit_while_course_down",
+      "timestamp_utc": "2026-09-05T06:03:34.068763+00:00",
+      "probe": {
+        "ok": false,
+        "status": 403,
+        "elapsed_ms": 8.85,
+        "body": {
+          "detail": "请先选课再提交作业"
+        }
+      },
+      "expect": "HTTP 503（选课/归属校验 fail-closed）",
+      "assignment_id": 2
+    },
+    {
+      "step": "SC03_recover_start_course_service",
+      "timestamp_utc": "2026-09-05T06:03:34.294527+00:00",
+      "compose": {
+        "command": "docker compose -f docker-compose.micro.prod.yml start course-service",
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "service \"mysql\" has no container to start\n"
+      }
+    },
+    {
+      "step": "SC03_health_after_recover",
+      "timestamp_utc": "2026-09-05T06:03:42.297511+00:00",
+      "probe": {
+        "ok": true,
+        "status": 200,
+        "elapsed_ms": 2.65,
+        "body": {
+          "status": "ok",
+          "service": "gateway",
+          "probes": {
+            "/api/health/user/": "user-service",
+            "/api/health/course/": "course-service",
+            "/api/health/assignment/": "assignment-service"
+          }
+        }
+      }
+    }
+  ]
+}

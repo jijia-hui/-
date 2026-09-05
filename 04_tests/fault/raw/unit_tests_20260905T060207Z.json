@@ -1,0 +1,59 @@
+{
+  "experiment": "fault_unit_tests",
+  "timestamp_utc": "20260905T060207Z",
+  "description": "故障语义自动化测试：503 fail-closed、降级、502 级联",
+  "targets": [
+    {
+      "service": "course_service",
+      "labels": [
+        "degrade",
+        "fail_closed"
+      ],
+      "modules": [
+        "tests.test_degrade",
+        "tests.test_internal"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "stdout": "Found 14 test(s).\nOperations to perform:\n  Synchronize unmigrated apps: corsheaders, rest_framework, staticfiles\n  Apply all migrations: contenttypes, courses\nSynchronizing apps without migrations:\n  Creating tables...\n    Running deferred SQL...\nRunning migrations:\n  Applying contenttypes.0001_initial... OK\n  Applying contenttypes.0002_remove_content_type_name... OK\n  Applying courses.0001_initial... OK\nSystem check identified no issues (0 silenced).\n",
+      "stderr": "Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n\ntest_detail_degrades_names_but_data_intact (tests.test_degrade.DegradeTests.test_detail_degrades_names_but_data_intact) ... ok\ntest_list_degrades_teacher_name (tests.test_degrade.DegradeTests.test_list_degrades_teacher_name) ... ok\ntest_created_at_auto (tests.test_internal.EnrollmentModelTests.test_created_at_auto) ... ok\ntest_unique_course_student (tests.test_internal.EnrollmentModelTests.test_unique_course_student) ... ok\ntest_course_detail_404 (tests.test_internal.InternalCourseApiTests.test_course_detail_404) ... ok\ntest_course_detail_shape (tests.test_internal.InternalCourseApiTests.test_course_detail_shape) ... ok\ntest_students_shape (tests.test_internal.InternalCourseApiTests.test_students_shape) ... ok\ntest_teacher_filter (tests.test_internal.InternalCourseApiTests.test_teacher_filter) ... ok\ntest_teacher_filter_requires_param (tests.test_internal.InternalCourseApiTests.test_teacher_filter_requires_param) ... ok\ntest_wrong_key_forbidden (tests.test_internal.InternalCourseApiTests.test_wrong_key_forbidden) ... ok\ntest_purge_deletes_courses_and_enrollments (tests.test_internal.InternalUserPurgeTests.test_purge_deletes_courses_and_enrollments) ... ok\ntest_purge_deletes_users_enrollments_in_others_courses (tests.test_internal.InternalUserPurgeTests.test_purge_deletes_users_enrollments_in_others_courses) ... ok\ntest_purge_fails_when_assignment_purge_fails (tests.test_internal.InternalUserPurgeTests.test_purge_fails_when_assignment_purge_fails) ... 清理用户 101 的课程数据时作业服务清理失败: assignment down\nok\ntest_purge_idempotent (tests.test_internal.InternalUserPurgeTests.test_purge_idempotent) ... ok\n\n----------------------------------------------------------------------\nRan 14 tests in 0.033s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n\n"
+    },
+    {
+      "service": "assignment_service",
+      "labels": [
+        "503",
+        "degrade",
+        "fail_closed"
+      ],
+      "modules": [
+        "tests.test_submissions",
+        "tests.test_assignments_api",
+        "tests.test_internal"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "stdout": "Found 37 test(s).\nOperations to perform:\n  Synchronize unmigrated apps: corsheaders, rest_framework, staticfiles\n  Apply all migrations: assignments, contenttypes\nSynchronizing apps without migrations:\n  Creating tables...\n    Running deferred SQL...\nRunning migrations:\n  Applying assignments.0001_initial... OK\n  Applying contenttypes.0001_initial... OK\n  Applying contenttypes.0002_remove_content_type_name... OK\nSystem check identified no issues (0 silenced).\n",
+      "stderr": "Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n\ntest_course_service_down_503 (tests.test_submissions.GradeTests.test_course_service_down_503) ... ok\ntest_missing_score_rejected (tests.test_submissions.GradeTests.test_missing_score_rejected) ... ok\ntest_other_teacher_cannot_grade (tests.test_submissions.GradeTests.test_other_teacher_cannot_grade) ... ok\ntest_owner_teacher_grades (tests.test_submissions.GradeTests.test_owner_teacher_grades) ... ok\ntest_score_out_of_range_rejected (tests.test_submissions.GradeTests.test_score_out_of_range_rejected) ... ok\ntest_student_cannot_grade (tests.test_submissions.GradeTests.test_student_cannot_grade) ... ok\ntest_assignment_filter (tests.test_submissions.SubmissionListTests.test_assignment_filter) ... ok\ntest_student_names_enriched_and_degraded (tests.test_submissions.SubmissionListTests.test_student_names_enriched_and_degraded) ... ok\ntest_student_sees_own_only (tests.test_submissions.SubmissionListTests.test_student_sees_own_only) ... ok\ntest_teacher_list_503_when_course_service_down (tests.test_submissions.SubmissionListTests.test_teacher_list_503_when_course_service_down) ... ok\ntest_teacher_scope_from_course_service (tests.test_submissions.SubmissionListTests.test_teacher_scope_from_course_service) ... ok\ntest_course_service_down_returns_503_not_bypass (tests.test_submissions.SubmitTests.test_course_service_down_returns_503_not_bypass) ... ok\ntest_enrolled_student_submits_pending (tests.test_submissions.SubmitTests.test_enrolled_student_submits_pending) ... ok\ntest_expired_assignment_rejected (tests.test_submissions.SubmitTests.test_expired_assignment_rejected) ... ok\ntest_missing_fields_400 (tests.test_submissions.SubmitTests.test_missing_fields_400) ... ok\ntest_not_enrolled_student_forbidden (tests.test_submissions.SubmitTests.test_not_enrolled_student_forbidden) ... ok\ntest_teacher_cannot_submit (tests.test_submissions.SubmitTests.test_teacher_cannot_submit) ... ok\ntest_unknown_assignment_400 (tests.test_submissions.SubmitTests.test_unknown_assignment_400) ... ok\ntest_course_service_down_503 (tests.test_assignments_api.AssignmentCreateTests.test_course_service_down_503) ... ok\ntest_missing_deadline_rejected (tests.test_assignments_api.AssignmentCreateTests.test_missing_deadline_rejected) ... ok\ntest_other_teacher_cannot_create (tests.test_assignments_api.AssignmentCreateTests.test_other_teacher_cannot_create) ... ok\ntest_owner_teacher_creates (tests.test_assignments_api.AssignmentCreateTests.test_owner_teacher_creates) ... ok\ntest_student_cannot_create (tests.test_assignments_api.AssignmentCreateTests.test_student_cannot_create) ... ok\ntest_unknown_course_rejected_400 (tests.test_assignments_api.AssignmentCreateTests.test_unknown_course_rejected_400) ... ok\ntest_detail (tests.test_assignments_api.AssignmentQueryTests.test_detail) ... ok\ntest_filter_by_course (tests.test_assignments_api.AssignmentQueryTests.test_filter_by_course) ... ok\ntest_delete_when_course_gone_404 (tests.test_assignments_api.AssignmentUpdateDeleteTests.test_delete_when_course_gone_404) ... ok\ntest_other_teacher_forbidden (tests.test_assignments_api.AssignmentUpdateDeleteTests.test_other_teacher_forbidden) ... ok\ntest_owner_deletes (tests.test_assignments_api.AssignmentUpdateDeleteTests.test_owner_deletes) ... ok\ntest_owner_updates (tests.test_assignments_api.AssignmentUpdateDeleteTests.test_owner_updates) ... ok\ntest_courses_purge_deletes_assignments_and_submissions (tests.test_internal.InternalPurgeTests.test_courses_purge_deletes_assignments_and_submissions) ... ok\ntest_courses_purge_idempotent (tests.test_internal.InternalPurgeTests.test_courses_purge_idempotent) ... ok\ntest_courses_purge_rejects_bad_payload (tests.test_internal.InternalPurgeTests.test_courses_purge_rejects_bad_payload) ... ok\ntest_user_purge_deletes_student_submissions (tests.test_internal.InternalPurgeTests.test_user_purge_deletes_student_submissions) ... ok\ntest_wrong_key_forbidden (tests.test_internal.InternalPurgeTests.test_wrong_key_forbidden) ... ok\ntest_assignment_is_expired (tests.test_internal.ModelRuleTests.test_assignment_is_expired) ... ok\ntest_submission_defaults (tests.test_internal.ModelRuleTests.test_submission_defaults) ... ok\n\n----------------------------------------------------------------------\nRan 37 tests in 0.076s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n\n"
+    },
+    {
+      "service": "user_service",
+      "labels": [
+        "502",
+        "cascade"
+      ],
+      "modules": [
+        "tests.test_delete_cascade"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "stdout": "Found 4 test(s).\nOperations to perform:\n  Synchronize unmigrated apps: corsheaders, messages, rest_framework, staticfiles\n  Apply all migrations: admin, auth, contenttypes, sessions, users\nSynchronizing apps without migrations:\n  Creating tables...\n    Running deferred SQL...\nRunning migrations:\n  Applying contenttypes.0001_initial... OK\n  Applying contenttypes.0002_remove_content_type_name... OK\n  Applying auth.0001_initial... OK\n  Applying auth.0002_alter_permission_name_max_length... OK\n  Applying auth.0003_alter_user_email_max_length... OK\n  Applying auth.0004_alter_user_username_opts... OK\n  Applying auth.0005_alter_user_last_login_null... OK\n  Applying auth.0006_require_contenttypes_0002... OK\n  Applying auth.0007_alter_validators_add_error_messages... OK\n  Applying auth.0008_alter_user_username_max_length... OK\n  Applying auth.0009_alter_user_last_name_max_length... OK\n  Applying auth.0010_alter_group_name_max_length... OK\n  Applying auth.0011_update_proxy_permissions... OK\n  Applying auth.0012_alter_user_first_name_max_length... OK\n  Applying users.0001_initial... OK\n  Applying admin.0001_initial... OK\n  Applying admin.0002_logentry_remove_auto_add... OK\n  Applying admin.0003_logentry_add_action_flag_choices... OK\n  Applying sessions.0001_initial... OK\nSystem check identified no issues (0 silenced).\n",
+      "stderr": "Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n\ntest_delete_fails_when_downstream_purge_fails (tests.test_delete_cascade.DeleteUserCascadeTests.test_delete_fails_when_downstream_purge_fails) ... 删除用户 del_stu 前级联清理失败: course-service down\nok\ntest_delete_requires_authentication (tests.test_delete_cascade.DeleteUserCascadeTests.test_delete_requires_authentication) ... ok\ntest_delete_success_calls_purge_then_deletes (tests.test_delete_cascade.DeleteUserCascadeTests.test_delete_success_calls_purge_then_deletes) ... ok\ntest_student_cannot_delete_other_user (tests.test_delete_cascade.DeleteUserCascadeTests.test_student_cannot_delete_other_user) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 1.698s\n\nOK\nDestroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...\n\n"
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "experiment": "fault_unit_tests",
+  "timestamp_utc": "20260905T041801Z",
+  "description": "故障语义自动化测试：503 fail-closed、降级、502 级联",
+  "targets": [
+    {
+      "service": "course_service",
+      "status": "skipped",
+      "reason": "目录不存在: C:\\Users\\ASUS\\Downloads\\--main (2)\\--main8.27\\services\\course_service（请在 main 分支或已合并 services/ 后运行）",
+      "modules": [
+        "tests.test_degrade",
+        "tests.test_internal"
+      ]
+    },
+    {
+      "service": "assignment_service",
+      "status": "skipped",
+      "reason": "目录不存在: C:\\Users\\ASUS\\Downloads\\--main (2)\\--main8.27\\services\\assignment_service（请在 main 分支或已合并 services/ 后运行）",
+      "modules": [
+        "tests.test_submissions",
+        "tests.test_assignments_api",
+        "tests.test_internal"
+      ]
+    },
+    {
+      "service": "user_service",
+      "status": "skipped",
+      "reason": "目录不存在: C:\\Users\\ASUS\\Downloads\\--main (2)\\--main8.27\\services\\user_service（请在 main 分支或已合并 services/ 后运行）",
+      "modules": [
+        "tests.test_delete_cascade"
+      ]
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 3
+  }
+}

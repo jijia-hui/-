@@ -1,0 +1,44 @@
+{
+  "experiment": "compose_fault_drill",
+  "timestamp_utc": "2026-09-05T04:17:55Z",
+  "base_url": "http://127.0.0.1:8080",
+  "dry_run": true,
+  "scenarios": [
+    {
+      "step": "SC00_baseline_health",
+      "timestamp_utc": "2026-09-05T04:17:57.287600+00:00",
+      "probe": {
+        "ok": false,
+        "status": null,
+        "elapsed_ms": 2097.33,
+        "error": "<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+      }
+    },
+    {
+      "step": "SC00_login",
+      "timestamp_utc": "2026-09-05T04:17:59.320958+00:00",
+      "success": false
+    },
+    {
+      "step": "SC00_courses_list",
+      "timestamp_utc": "2026-09-05T04:18:01.363500+00:00",
+      "probe": {
+        "ok": false,
+        "status": null,
+        "elapsed_ms": 2042.46,
+        "error": "<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+      }
+    },
+    {
+      "step": "SC01_user_service_down",
+      "timestamp_utc": "2026-09-05T04:18:01.363517+00:00",
+      "dry_run": true,
+      "note": "跳过 docker stop"
+    },
+    {
+      "step": "SC02_user_service_recover",
+      "timestamp_utc": "2026-09-05T04:18:01.363520+00:00",
+      "dry_run": true
+    }
+  ]
+}
